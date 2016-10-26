@@ -88,3 +88,5 @@ tags
 ## Other
 Makefile
 config.h
+
+!dnssec-trigger.tmpfiles.d
