@@ -59,7 +59,8 @@ some user input is needed, the panel creates a dialog window.
     --with-keydir=%{_sysconfdir}/dnssec-trigger \
     --with-hooks=networkmanager \
     --with-python=%{__python3} \
-    --with-pidfile=%{_localstatedir}/run/%{name}d.pid
+    --with-pidfile=%{_localstatedir}/run/%{name}d.pid \
+    --with-forward-zones-support
 
 %{__make} %{?_smp_mflags}
 
