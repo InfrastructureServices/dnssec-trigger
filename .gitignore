@@ -88,5 +88,20 @@ tags
 ## Other
 Makefile
 config.h
+autom4te.cache
+config.log
+config.status
 
 !dnssec-trigger.tmpfiles.d
+
+## Build targets
+01-dnssec-trigger
+dnssec-trigger-control
+dnssec-trigger-control-setup
+dnssec-trigger-panel
+dnssec-trigger-panel.desktop
+dnssec-trigger-script
+dnssec-trigger.8
+dnssec-triggerd
+dnssec-triggerd.service
+example.conf
