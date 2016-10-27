@@ -51,6 +51,9 @@
 #ifdef USE_WINSOCK
 #include "winsock_event.h"
 #endif
+#ifdef FWD_ZONES_SUPPORT
+#include "fwd_zones.h"
+#endif
 
 struct svr* global_svr = NULL;
 
@@ -794,7 +797,7 @@ static void handle_submit(char* ips)
 
 #ifdef FWD_ZONES_SUPPORT
 static void handle_update_all(char *json) {
-    printf("To be implemented...");
+    yield_connections_from_json(json);
     // ConnectionChain *connections = parse_connections(json);
     // if(!connections)
     //     return;

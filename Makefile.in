@@ -56,6 +56,7 @@ login_command=@login_command@
 login_location=@login_location@
 check_updates=@check_updates@
 unbound_control_path=@unbound_control_path@
+FWD_ZONES_SUPPORT=@FWD_ZONES_SUPPORT@
 DATE=$(shell date +%F -r $(srcdir)/Changelog)
 
 do_subst = sed -e 's,[@]SHELL[@],$(SHELL),g' \
@@ -150,6 +151,9 @@ endif
 ifeq "$(hooks)" "osx"
 RIGGERD_SRC+=osx/wakelist.c
 LDNSLIBS+=-framework IOKit -framework CoreFoundation
+endif
+ifeq "$(FWD_ZONES_SUPPORT)" "yes"
+RIGGERD_SRC+= vendor/ccan/json/json.c riggerd/string_list.c riggerd/connection_list.c riggerd/fwd_zones.c
 endif
 RIGGERD_OBJ=$(addprefix $(BUILD),$(RIGGERD_SRC:.c=.o)) $(COMPAT_OBJ)
 
