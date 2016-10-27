@@ -792,6 +792,22 @@ static void handle_submit(char* ips)
 	probe_start(ips);
 }
 
+#ifdef FWD_ZONES_SUPPORT
+static void handle_update_all(char *json) {
+    printf("To be implemented...");
+    // ConnectionChain *connections = parse_connections(json);
+    // if(!connections)
+    //     return;
+
+    // update_global_forwarders(global_svr, connections);
+    // update_connection_zones(global_svr, connections);
+
+    // freeConnectionChain(connections, false);
+    //deprecated todo: at app ending/closing free global_forwarders and stored_zones
+    //this should be handled by svr_delete where it is implemented, so if app handles svr_deleting this todo is done
+}
+#endif
+
 /** append update signal to buffer to send */
 static void
 append_update_to_con(struct sslconn* s, char* version_available)
@@ -1051,6 +1067,11 @@ static void sslconn_command(struct sslconn* sc)
 	} else if(strncmp(str, "stop", 4) == 0) {
 		comm_base_exit(global_svr->base);
 		sslconn_shutdown(sc);
+#ifdef FWD_ZONES_SUPPORT
+       } else if(strncmp(str, "update_all", 10) == 0) {
+                handle_update_all(str+10);  // moves pointer above the command name upto args
+                sslconn_shutdown(sc);
+#endif
 	} else {
 		verbose(VERB_DETAIL, "unknown command: %s", str);
 		handle_printclose(sc, "error unknown command");
