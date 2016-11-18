@@ -1,4 +1,4 @@
-#!@PYTHON@ -sE
+#!/usr/bin/python -sE
 # -*- coding: utf-8 -*-
 """
 @author: Tomas Hozza <thozza@redhat.com>
@@ -748,9 +748,13 @@ class Application:
 
         json_struct["connections"] = connections
         #CMD = ["dnssec-trigger-control", "update_all", json.dumps(json_struct)]
+        print("Inline version:")
         print(json.dumps(json_struct))
+        print("Pretty version:")
+        print(json.dumps(json_struct, sort_keys=True, indent=4, separators=(',', ': ')))
         try:
-            subprocess.check_call(CMD)
+            #subprocess.check_call(CMD)
+            print("Tož tu to zavolám, až to bude hotový...")
         except subprocess.CalledProcessError:
             pass
 
