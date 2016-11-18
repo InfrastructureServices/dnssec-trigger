@@ -105,3 +105,6 @@ dnssec-trigger.8
 dnssec-triggerd
 dnssec-triggerd.service
 example.conf
+
+test/*
+!test/*.c

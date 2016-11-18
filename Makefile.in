@@ -156,8 +156,10 @@ ifeq "$(FWD_ZONES_SUPPORT)" "yes"
 RIGGERD_SRC+= vendor/ccan/json/json.c riggerd/string_list.c riggerd/connection_list.c riggerd/fwd_zones.c
 endif
 RIGGERD_OBJ=$(addprefix $(BUILD),$(RIGGERD_SRC:.c=.o)) $(COMPAT_OBJ)
+TESTS_SRC=test/json.c
+TESTS_OBJ=$(addprefix $(BUILD),$(TESTS_SRC:.c=.o)) $(COMPAT_OBJ)
 
-ALL_SRC=$(sort $(COMMON_SRC) $(PANEL_SRC) $(RIGGERD_SRC) $(KEYGEN_SRC) $(CONTROL_SRC))
+ALL_SRC=$(sort $(COMMON_SRC) $(PANEL_SRC) $(RIGGERD_SRC) $(KEYGEN_SRC) $(CONTROL_SRC) $(TESTS_SRC))
 ALL_OBJ=$(addprefix $(BUILD),$(ALL_SRC:.c=.o) \
 	$(addprefix compat/,$(LIBOBJS:.o=.o))) $(COMPAT_OBJ)
 
@@ -186,8 +188,13 @@ $(BUILD)%.o:    $(srcdir)/%.c
 
 all:	$(COMMON_OBJ) dnssec-triggerd$(EXEEXT) dnssec-trigger-control$(EXEEXT) dnssec-trigger-control-setup $(makehook) $(makegui) example.conf dnssec-trigger.8 dnssec-triggerd.service
 
-test:	
-	@echo done
+test:	test/json-test
+	@echo "Run!"
+	./test/json-test
+
+test/json-test$(EXEEXT):	$(RIGGERD_OBJ) $(TESTS_OBJ)
+	$(INFO) Link $@
+	$Q$(LINK) -o $@ $(BUILD)test/json.o $(BUILD)riggerd/connection_list.o  $(BUILD)riggerd/fwd_zones.o $(BUILD)riggerd/string_list.o  $(BUILD)riggerd/log.o $(BUILD)vendor/ccan/json/json.o $(LDNSLIBS) $(LIBS)
 
 example.conf:	$(srcdir)/example.conf.in Makefile
 	rm -f $@
