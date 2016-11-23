@@ -29,6 +29,9 @@ struct string_entry {
 	size_t length;
 };
 
+// TODO: move somewhere else
+void* calloc_or_die(size_t size);
+
 /**
  * Initialize a new list of strings
  * @param list: New list
@@ -70,6 +73,8 @@ size_t string_list_length(const struct string_list* list);
  * @param l2: Second list
  */
 bool string_list_is_equal(const struct string_list* l1, const struct string_list* l2);
+
+void string_list_dbg_print(const struct string_list* list);
 
 #endif /* STRING_LIST_H */
 

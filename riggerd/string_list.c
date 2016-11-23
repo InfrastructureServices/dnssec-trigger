@@ -30,7 +30,7 @@ void string_list_clear(struct string_list* list)
 	}
 }
 
-static void* calloc_or_die(size_t size) {
+void* calloc_or_die(size_t size) {
 	void* mem = calloc(1, size);
 	if (NULL == mem){
 		fatal_exit("out of memory");
@@ -114,6 +114,15 @@ bool string_list_is_equal(const struct string_list* l1, const struct string_list
 	}
 
 	return true;
+}
+
+void string_list_dbg_print(const struct string_list* list)
+{
+    struct string_entry *iter = list->first;
+    while(NULL != iter) {
+        printf("%s, ", iter->string);
+        iter = iter->next;
+    }
 }
 
 #endif

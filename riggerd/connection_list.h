@@ -27,11 +27,11 @@ struct nm_connection {
     /** Is this connection the default one? */
     bool default_con;
     /** Linked list of zones */
-    struct string_list *zones;
+    struct string_list zones;
     /** Type of this connection as defined in enum connection_type */
     enum nm_connection_type type;
     /** Linked list of servers */
-    struct string_list *servers;
+    struct string_list servers;
 };
 
 /**
@@ -41,7 +41,7 @@ struct nm_connection_node {
     /** Pointer to this connection struct. */
     struct nm_connection *self;
     /** Pointer to the next connection. */
-    struct nm_connection *next;
+    struct nm_connection_node *next;
 };
 
 
@@ -54,6 +54,11 @@ struct nm_connection_list {
     struct nm_connection_node *first;
 };
 
+void nm_connection_init(struct nm_connection *conn);
+
 void nm_connection_list_init(struct nm_connection_list *list);
+void nm_connection_list_clear(struct nm_connection_list *list);
+void nm_connection_list_push_back(struct nm_connection_list *list, struct nm_connection *new_value);
+void nm_connection_list_dbg_print(struct nm_connection_list *list);
 
 #endif /* CONNECTION_LIST_H */

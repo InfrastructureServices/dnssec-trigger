@@ -15,8 +15,7 @@ struct nm_connection_list yield_connections_from_json(char *json)
 
 	/* Decode the input string and check it again */
 	JsonNode *head = json_decode(json);
-	//shouldn't be null because we've checked its validity
-	if (head->tag != JSON_OBJECT) {
+	if (NULL == head || head->tag != JSON_OBJECT) {
 	    return ret;
 
 	}
