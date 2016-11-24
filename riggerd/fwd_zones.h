@@ -7,7 +7,7 @@
 /**
  * Read input in json format and parse it
  * into list of connections. In case of failure
- * return empty list.
+ * return an empty list.
  */
 struct nm_connection_list yield_connections_from_json(char *json);
 

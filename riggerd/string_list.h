@@ -30,6 +30,10 @@ struct string_entry {
 };
 
 // TODO: move somewhere else
+/*
+ * Thin wrapper around malloc. It either gets a valid memory
+ * or exit the whole process.
+ */
 void* calloc_or_die(size_t size);
 
 /**
@@ -74,6 +78,10 @@ size_t string_list_length(const struct string_list* list);
  */
 bool string_list_is_equal(const struct string_list* l1, const struct string_list* l2);
 
+/**
+ * Print list of strings onto one line without newline at the end.
+ * @param list: List to be printed
+ */
 void string_list_dbg_print(const struct string_list* list);
 
 #endif /* STRING_LIST_H */

@@ -18,6 +18,7 @@ void nm_connection_list_init(struct nm_connection_list *list)
 
 void nm_connection_list_clear(struct nm_connection_list *list)
 {
+    //TODO: implement this!
 }
 
 void nm_connection_list_push_back(struct nm_connection_list *list, struct nm_connection *new_value)

@@ -54,11 +54,38 @@ struct nm_connection_list {
     struct nm_connection_node *first;
 };
 
+/**
+ * Initialize all members of connection struct
+ * @param conn: Connection to be initialized
+ */
 void nm_connection_init(struct nm_connection *conn);
 
+/**
+ * Initialize an empty list of connections
+ * @param list: List to be initialized
+ */
 void nm_connection_list_init(struct nm_connection_list *list);
+
+/**
+ * Free the whole list and all its components (connection nodes and lists of strings)
+ * Be careful though, use this only on owning lists. Usage on non-owning lists can cause
+ * memory corruption.
+ * @param list: List to be freed
+ */
 void nm_connection_list_clear(struct nm_connection_list *list);
+
+/**
+ * Push a new connections into the list. The new connection is now owned by the list. You
+ * should not use it elsewhere.
+ * @param list: List to push to
+ * @param new_value: New connection
+ */
 void nm_connection_list_push_back(struct nm_connection_list *list, struct nm_connection *new_value);
+
+/**
+ * Print the whole list onto stdout.
+ * @param list: List to be printed
+ */
 void nm_connection_list_dbg_print(struct nm_connection_list *list);
 
 #endif /* CONNECTION_LIST_H */
