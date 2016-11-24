@@ -37,6 +37,44 @@ void nm_connection_list_push_back(struct nm_connection_list *list, struct nm_con
     // new_value is now owned by connection list => it will be freed with the list
 }
 
+struct nm_connection_list nm_connection_list_filter(struct nm_connection_list *list,
+        unsigned int count, ...)
+{
+    struct nm_connection_list ret;
+    nm_connection_list_init(&ret);
+
+    if (NULL == list)
+        return ret;
+
+    va_list args;
+    va_start(args, count);
+
+    for (struct nm_connection_node *iter = list->first; NULL != iter; iter = iter->next) {
+        if (count == 0) {
+            // This is weird use case, but ok ...
+            nm_connection_list_push_back(&ret, iter->self);
+        } else {
+            // TODO: implement
+        }
+    }
+
+    va_end(args);
+    return ret;
+}
+
+size_t nm_connection_list_length(struct nm_connection_list *list)
+{
+    if (NULL == list)
+        return 0;
+
+    size_t counter = 0;
+    for (struct nm_connection_node *iter = list->first; NULL != iter; iter = iter->next) {
+        counter++;
+    }
+
+    return counter;
+}
+
 void nm_connection_list_dbg_print(struct nm_connection_list *list)
 {
     if (NULL == list)

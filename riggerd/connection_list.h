@@ -4,6 +4,7 @@
 #define CONNECTION_LIST_H
 
 #include <stdbool.h>
+#include <stdarg.h>
 
 #include "string_list.h"
 
@@ -55,6 +56,12 @@ struct nm_connection_list {
 };
 
 /**
+ * Filter function footprint.
+ * @param conn: The connection struct to check
+ */
+typedef bool (*filter_conn_fcn)(struct nm_connection const *conn);
+
+/**
  * Initialize all members of connection struct
  * @param conn: Connection to be initialized
  */
@@ -81,6 +88,18 @@ void nm_connection_list_clear(struct nm_connection_list *list);
  * @param new_value: New connection
  */
 void nm_connection_list_push_back(struct nm_connection_list *list, struct nm_connection *new_value);
+
+/**
+ * Filter connections list and return a new non-owning one, which contains only those connections
+ * that satisfy **all** filters.
+ * @param list: Original list (will be a superset to the new one)
+ * @param count: Number of filters given to this function
+ * @return: The new list
+ */
+struct nm_connection_list nm_connection_list_filter(struct nm_connection_list *list,
+        unsigned int count, ...);
+
+size_t nm_connection_list_length(struct nm_connection_list *list);
 
 /**
  * Print the whole list onto stdout.

@@ -55,4 +55,7 @@ int main() {
     printf("Test json parser:\n%s\n", json);
     struct nm_connection_list l = yield_connections_from_json(json);
     nm_connection_list_dbg_print(&l);
+    printf("Length is: %zu\n", nm_connection_list_length(&l));
+    struct nm_connection_list l2 = nm_connection_list_filter(&l, 0);
+    printf("Length is: %zu\n", nm_connection_list_length(&l2));
 }
