@@ -77,6 +77,12 @@ typedef bool (*filter_conn_fcn)(struct nm_connection const *);
  */
 void nm_connection_init(struct nm_connection *conn);
 
+/**
+ * Free all memory used by this struct
+ * @param conn: Connection to be freed
+ */
+void nm_connection_clear(struct nm_connection *conn);
+
 /*
  * Initialize an empty owning list of connections
  * @param list: List to be initialized
@@ -126,6 +132,12 @@ size_t nm_connection_list_length(struct nm_connection_list *list);
  * @param list: List to be printed
  */
 void nm_connection_list_dbg_print(struct nm_connection_list *list);
+
+/**
+ * Print the whole list into char buffer.
+ * @param list: List to be printed
+ */
+char* nm_connection_list_sprint_servers(struct nm_connection_list *list);
 
 /**
  * Return true if the connection is VPN

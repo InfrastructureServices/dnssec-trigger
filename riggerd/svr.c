@@ -797,7 +797,13 @@ static void handle_submit(char* ips)
 
 #ifdef FWD_ZONES_SUPPORT
 static void handle_update_all(char *json) {
-    yield_connections_from_json(json);
+    struct nm_connection_list original =  yield_connections_from_json(json);
+    struct nm_connection_list defaults = nm_connection_list_filter(&original, 1, &nm_connection_filter_default);
+    char* global_forward_candidates = NULL; //TODO: need to get them from the list
+
+    nm_connection_list_clear(&defaults);
+    nm_connection_list_clear(&original);
+
     // ConnectionChain *connections = parse_connections(json);
     // if(!connections)
     //     return;

@@ -133,6 +133,8 @@ int string_list_sprint(const struct string_list* list, char *buffer, size_t len)
     if (NULL == list || NULL == buffer || 0 == len)
         return 0;
 
+    size_t orig = len;
+
     struct string_entry *iter = list->first;
     while(NULL != iter) {
         // TODO: print into the buffer
@@ -152,6 +154,11 @@ int string_list_sprint(const struct string_list* list, char *buffer, size_t len)
 
         iter = iter->next;
     }
+
+    if (orig-len<0)
+        log_err("string_list_sprint: arithmetic error");
+
+    return orig-len;
 }
 
 #endif

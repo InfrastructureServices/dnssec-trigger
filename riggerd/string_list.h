@@ -90,7 +90,7 @@ void string_list_dbg_print(const struct string_list* list);
  * @param list: List to print
  * @param buffer: Buffer to print the list into
  * @param len: size of the buffer
- * @return: 0 = success, -1 = list does not fit into the buffer
+ * @return: success >= 0, -1 = list does not fit into the buffer
  */
 int string_list_sprint(const struct string_list* list, char *buffer, size_t len);
 

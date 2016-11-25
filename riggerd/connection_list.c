@@ -11,6 +11,12 @@ void nm_connection_init(struct nm_connection *conn)
     string_list_init(&conn->servers);
 }
 
+void nm_connection_clear(struct nm_connection *conn)
+{
+    string_list_clear(&conn->zones);
+    string_list_clear(&conn->servers);
+}
+
 void nm_connection_list_init(struct nm_connection_list *list)
 {
     list->first = NULL;
@@ -25,7 +31,26 @@ void nm_connection_list_init_non_owning(struct nm_connection_list *list)
 
 void nm_connection_list_clear(struct nm_connection_list *list)
 {
-    //TODO: implement this!
+    if (NULL == list)
+        return;
+
+    struct nm_connection_node *current = list->first;
+    struct nm_connection_node *next = NULL;
+    while (NULL != current){
+        next = current->next;
+
+        if (LIST_OWNING == list->ownership){
+            // We own the whole structure, clean up everything!
+            nm_connection_clear(current->self);
+            free(current->self);
+            free(current);
+        } else {
+            // We own only nodes, not its content
+            free(current);
+        }
+
+        current = next;
+    }
 }
 
 void nm_connection_list_push_back(struct nm_connection_list *list, struct nm_connection *new_value)
@@ -144,6 +169,11 @@ void nm_connection_list_dbg_print(struct nm_connection_list *list)
         ++n;
         iter = iter->next;
     }
+}
+
+char* nm_connection_list_sprint_servers(struct nm_connection_list *list)
+{
+    // TODO
 }
 
 bool nm_connection_filter_type_vpn(struct nm_connection const *conn)
