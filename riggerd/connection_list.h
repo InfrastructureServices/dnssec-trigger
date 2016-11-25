@@ -17,7 +17,15 @@ enum nm_connection_type {
     NM_CON_WIFI,
     NM_CON_OTHER,
     NM_CON_IGNORE,
-    NM_CON_DELIMITER
+    NM_CON_DELIMITER // XXX: What is this??
+};
+
+/**
+ *
+ */
+enum list_ownership_type {
+  LIST_OWNING,
+  LIST_NON_OWNING
 };
 
 /**
@@ -53,13 +61,15 @@ struct nm_connection_node {
 struct nm_connection_list {
     /** Head of a list */
     struct nm_connection_node *first;
+    /** Ownership status of this list */
+    enum list_ownership_type ownership;
 };
 
 /**
  * Filter function footprint.
  * @param conn: The connection struct to check
  */
-typedef bool (*filter_conn_fcn)(struct nm_connection const *conn);
+typedef bool (*filter_conn_fcn)(struct nm_connection const *);
 
 /**
  * Initialize all members of connection struct
@@ -67,11 +77,17 @@ typedef bool (*filter_conn_fcn)(struct nm_connection const *conn);
  */
 void nm_connection_init(struct nm_connection *conn);
 
-/**
- * Initialize an empty list of connections
+/*
+ * Initialize an empty owning list of connections
  * @param list: List to be initialized
  */
 void nm_connection_list_init(struct nm_connection_list *list);
+
+/*
+ * Initialize an empty non-owning list of connections
+ * @param list: List to be initialized
+ */
+void nm_connection_list_init_non_owning(struct nm_connection_list *list);
 
 /**
  * Free the whole list and all its components (connection nodes and lists of strings)
@@ -99,6 +115,10 @@ void nm_connection_list_push_back(struct nm_connection_list *list, struct nm_con
 struct nm_connection_list nm_connection_list_filter(struct nm_connection_list *list,
         unsigned int count, ...);
 
+/**
+ * Measure the length of a list
+ * @param list: The list to be measures
+ */
 size_t nm_connection_list_length(struct nm_connection_list *list);
 
 /**
@@ -106,5 +126,23 @@ size_t nm_connection_list_length(struct nm_connection_list *list);
  * @param list: List to be printed
  */
 void nm_connection_list_dbg_print(struct nm_connection_list *list);
+
+/**
+ * Return true if the connection is VPN
+ * @param conn: Single connection to be tested
+ */
+bool nm_connection_filter_type_vpn(struct nm_connection const *conn);
+
+/**
+ * Return true if the connection is default
+ * @param conn: Single connection to be tested
+ */
+bool nm_connection_filter_default(struct nm_connection const *conn);
+
+/**
+ * Return true if the connection is of type OTHER
+ * @param conn: Single connection to be tested
+ */
+bool nm_connection_filter_type_other(struct nm_connection const *conn);
 
 #endif /* CONNECTION_LIST_H */

@@ -58,4 +58,12 @@ int main() {
     printf("Length is: %zu\n", nm_connection_list_length(&l));
     struct nm_connection_list l2 = nm_connection_list_filter(&l, 0);
     printf("Length is: %zu\n", nm_connection_list_length(&l2));
+    struct nm_connection_list l3 = nm_connection_list_filter(&l, 1, &nm_connection_filter_type_vpn);
+    printf("Length is: %zu\n", nm_connection_list_length(&l3));
+    struct nm_connection_list l4 = nm_connection_list_filter(&l, 1, &nm_connection_filter_default);
+    printf("Length is: %zu\n", nm_connection_list_length(&l4));
+    struct nm_connection_list l5 = nm_connection_list_filter(&l, 2, &nm_connection_filter_type_other, &nm_connection_filter_default);
+    printf("Length is: %zu\n", nm_connection_list_length(&l5));
+    struct nm_connection_list l6 = nm_connection_list_filter(&l, 2, &nm_connection_filter_type_vpn, &nm_connection_filter_default);
+    printf("Length is: %zu\n", nm_connection_list_length(&l6));
 }
