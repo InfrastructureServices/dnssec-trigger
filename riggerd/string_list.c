@@ -83,7 +83,7 @@ bool string_list_contains(const struct string_list* list, const char* value, con
 
 size_t string_list_length(const struct string_list* list)
 {
-	if (NULL != list)
+	if (NULL == list)
 		return 0;
 
 	size_t len = 0;
@@ -118,9 +118,38 @@ bool string_list_is_equal(const struct string_list* l1, const struct string_list
 
 void string_list_dbg_print(const struct string_list* list)
 {
+    if (NULL == list)
+        return;
+
     struct string_entry *iter = list->first;
     while(NULL != iter) {
         printf("%s, ", iter->string);
+        iter = iter->next;
+    }
+}
+
+int string_list_sprint(const struct string_list* list, char *buffer, size_t len)
+{
+    if (NULL == list || NULL == buffer || 0 == len)
+        return 0;
+
+    struct string_entry *iter = list->first;
+    while(NULL != iter) {
+        // TODO: print into the buffer
+        if (iter->length > len) {
+            // This address wouldn't fit into the buffer
+            return -1;
+        }
+
+        int print_ret = snprintf(buffer, len, "%s ", iter->string);
+        if (print_ret >= len || print_ret < 0)
+        {
+            // This should never happen because we have already checked the length
+            return -1;
+        }
+        buffer += print_ret;
+        len -= print_ret;
+
         iter = iter->next;
     }
 }

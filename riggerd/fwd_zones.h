@@ -4,6 +4,7 @@
 #if !defined FWD_ZONES_H && defined FWD_ZONES_SUPPORT
 #define FWD_ZONES_H
 
+// TODO: this should probably go to connection_list.h as well
 /**
  * Read input in json format and parse it
  * into list of connections. In case of failure

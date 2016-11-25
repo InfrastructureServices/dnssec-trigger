@@ -84,5 +84,15 @@ bool string_list_is_equal(const struct string_list* l1, const struct string_list
  */
 void string_list_dbg_print(const struct string_list* list);
 
+/**
+ * Print list into a buffer. Be careful, you have to free the buffer
+ * yourself.
+ * @param list: List to print
+ * @param buffer: Buffer to print the list into
+ * @param len: size of the buffer
+ * @return: 0 = success, -1 = list does not fit into the buffer
+ */
+int string_list_sprint(const struct string_list* list, char *buffer, size_t len);
+
 #endif /* STRING_LIST_H */
 
