@@ -67,8 +67,13 @@ int main() {
     struct nm_connection_list l6 = nm_connection_list_filter(&l, 2, &nm_connection_filter_type_vpn, &nm_connection_filter_default);
     printf("Length is: %zu\n", nm_connection_list_length(&l6));
 
-    char *buffer = calloc_or_die(1000);
+    char *buffer = nm_connection_list_sprint_servers(&l);
+    printf("Servers: %s\n", buffer);
+    free(buffer);
+
+    buffer = calloc_or_die(1000);
     string_list_sprint(&l.first->self->servers, buffer, 1000);
     printf("%s\n", buffer);
     free(buffer);
+    nm_connection_list_clear(&l);
 }

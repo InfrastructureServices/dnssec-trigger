@@ -134,7 +134,8 @@ size_t nm_connection_list_length(struct nm_connection_list *list);
 void nm_connection_list_dbg_print(struct nm_connection_list *list);
 
 /**
- * Print the whole list into char buffer.
+ * Print all servers into char buffer. The caller is reposinble for releasing the
+ * buffer with free().
  * @param list: List to be printed
  */
 char* nm_connection_list_sprint_servers(struct nm_connection_list *list);

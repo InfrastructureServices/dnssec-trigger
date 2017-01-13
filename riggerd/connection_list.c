@@ -3,6 +3,8 @@
 
 #ifdef FWD_ZONES_SUPPORT
 
+#include "log.h"
+
 void nm_connection_init(struct nm_connection *conn)
 {
     conn->default_con = false;
@@ -173,7 +175,59 @@ void nm_connection_list_dbg_print(struct nm_connection_list *list)
 
 char* nm_connection_list_sprint_servers(struct nm_connection_list *list)
 {
-    // TODO
+    if (NULL == list)
+        return NULL;
+
+    /*
+     * Create string buffer with appropriate length:
+     */
+
+    // Iterate over all connections
+    struct nm_connection_node *iter = list->first;
+    // Accumulate length of all server strings
+    size_t acc = 0;
+    while (NULL != iter) {
+
+        // Iterate over all servers in each connection
+        struct string_entry *str_iter = iter->self->servers.first;
+        while(NULL != str_iter) {
+            // Str length + one space after each server
+            acc += str_iter->length + 1;
+            str_iter = str_iter->next;
+        }
+
+        iter = iter->next;
+    }
+
+    // acc + null byte
+    size_t len = sizeof(char)*(acc+1);
+    char *buffer = (char *)calloc_or_die(len);
+    // fill the buffer with spaces
+    memset(buffer, ' ', len);
+    char *buf_iter = buffer;
+
+    /*
+     * Fill in the buffer
+     */
+    iter = list->first;
+    while (NULL != iter) {
+
+        struct string_entry *str_iter = iter->self->servers.first;
+        while(NULL != str_iter) {
+            size_t current_len = buf_iter - buffer;
+            if (current_len + str_iter->length > len) {
+                fatal_exit("Error handling string buffers");
+            }
+            memcpy(buf_iter, str_iter->string, str_iter->length);
+            buf_iter += str_iter->length + 1;
+            str_iter = str_iter->next;
+        }
+
+        iter = iter->next;
+    }
+    buf_iter--;
+    *buf_iter = '\0';
+    return buffer;
 }
 
 bool nm_connection_filter_type_vpn(struct nm_connection const *conn)
