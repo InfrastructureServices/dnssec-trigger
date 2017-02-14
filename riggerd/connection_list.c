@@ -173,10 +173,14 @@ void nm_connection_list_dbg_print(struct nm_connection_list *list)
     }
 }
 
-char* nm_connection_list_sprint_servers(struct nm_connection_list *list)
+struct string_buffer nm_connection_list_sprint_servers(struct nm_connection_list *list)
 {
+    struct string_buffer ret = {
+        .string = NULL,
+        .length = 0
+    };
     if (NULL == list)
-        return NULL;
+        return ret;
 
     /*
      * Create string buffer with appropriate length:
@@ -227,7 +231,9 @@ char* nm_connection_list_sprint_servers(struct nm_connection_list *list)
     }
     buf_iter--;
     *buf_iter = '\0';
-    return buffer;
+    ret.string = buffer;
+    ret.length = len;
+    return ret;
 }
 
 bool nm_connection_filter_type_vpn(struct nm_connection const *conn)

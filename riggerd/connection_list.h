@@ -7,6 +7,7 @@
 #include <stdarg.h>
 
 #include "string_list.h"
+#include "string_buffer.h"
 
 /**
  * All possible types of connections
@@ -138,7 +139,7 @@ void nm_connection_list_dbg_print(struct nm_connection_list *list);
  * buffer with free().
  * @param list: List to be printed
  */
-char* nm_connection_list_sprint_servers(struct nm_connection_list *list);
+struct string_buffer nm_connection_list_sprint_servers(struct nm_connection_list *list);
 
 /**
  * Return true if the connection is VPN
