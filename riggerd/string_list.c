@@ -1,3 +1,15 @@
+/*
+FIXME:
+usr/include/libpng16 -o build/riggerd/string_list.o -c riggerd/string_list.c
+riggerd/string_list.c:40:1: warning: control may reach end of non-void function [-Wreturn-type]
+}
+^
+riggerd/string_list.c:158:17: warning: comparison of unsigned expression < 0 is always false [-Wtautological-compare]
+    if (orig-len<0)
+        ~~~~~~~~^~
+2 warnings generated.
+ */
+
 #include "string_list.h"
 
 #ifdef FWD_ZONES_SUPPORT
