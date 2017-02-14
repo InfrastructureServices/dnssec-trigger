@@ -16,9 +16,12 @@ Single linker list of connections encapsulated with node.
 ### Owning vs non-owning lists
 Owning list is supposed to be the original one with all connections. It's responsible for the memory it has. On the other hand, non-owning list is only a subset of the original one. It contains pointers to the same memory locations as the original one, thus it might not outlive its original.
 
-Use cases:
+**Use cases:**
  * owning - the original one - e.g. list parsed from JSON input
  * non-owning - view into the original, e.g. only default connections, or VPN
+
+**Filtering:**
+There is the `nm_connection_list_filter` function, which takes list of predicates as arguments (variable amount of them) and filter the list accordingly.
 
 
 # Functions
