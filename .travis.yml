@@ -1,6 +1,22 @@
+dist: trusty
 language: c
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y libssl-dev ldns flex libfl-dev libev-libevent-dev libexpat1 bison
+  - sudo apt-get install -y gir1.2-networkmanager-1.0 libc6 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk2.0-0 libldns1 libssl1.0.0 python python-gi python-lockfile unbound libldns-dev libgtk2.0-dev
+before_script:
+    - pwd
+    - cd ..
+    - wget --no-check-certificate https://cmocka.org/files/1.1/cmocka-1.1.0.tar.xz
+    - tar xf cmocka-1.1.0.tar.xz
+    - cd cmocka-1.1.0
+    - sudo apt-get -y install cmake
+    - mkdir build
+    - cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
+    - make
+    - sudo make install
+    - cd ../../dnssec-trigger-fedora
+env:
+  - CFLAGS=-std=gnu99
 script:
   - ./configure --with-forward-zones-support && make && make test

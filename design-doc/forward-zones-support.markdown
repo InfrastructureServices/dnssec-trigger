@@ -28,6 +28,5 @@ There is the `nm_connection_list_filter` function, which takes list of predicate
 ## yield form json
 Used to parse json given by the dnssec trigger script into connection list.
 
-
 # Used libraries
-So far only JSON parser is used.
+So far only JSON parser and Cmocka is used.
