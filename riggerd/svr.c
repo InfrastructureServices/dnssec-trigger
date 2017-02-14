@@ -799,7 +799,13 @@ static void handle_submit(char* ips)
 static void handle_update_all(char *json) {
     struct nm_connection_list original =  yield_connections_from_json(json);
     struct nm_connection_list defaults = nm_connection_list_filter(&original, 1, &nm_connection_filter_default);
-    char* global_forward_candidates = NULL; //TODO: need to get them from the list
+    struct string_buffer global_forward_candidates = nm_connection_list_sprint_servers(&defaults);
+    // XXX: now I should call update_global_forwarders or probing, not sure yet
+    probe_start(global_forward_candidates.string);
+
+
+    // Cleanup:
+    free(global_forward_candidates.string);
 
     nm_connection_list_clear(&defaults);
     nm_connection_list_clear(&original);

@@ -23,7 +23,6 @@ Owning list is supposed to be the original one with all connections. It's respon
 **Filtering:**
 There is the `nm_connection_list_filter` function, which takes list of predicates as arguments (variable amount of them) and filter the list accordingly.
 
-
 # Functions
 
 ## yield form json

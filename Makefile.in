@@ -194,7 +194,7 @@ test:	test/json-test
 
 test/json-test$(EXEEXT):	$(RIGGERD_OBJ) $(TESTS_OBJ)
 	$(INFO) Link $@
-	$Q$(LINK) -o $@ $(BUILD)test/json.o $(BUILD)riggerd/connection_list.o  $(BUILD)riggerd/fwd_zones.o $(BUILD)riggerd/string_list.o  $(BUILD)riggerd/log.o $(BUILD)vendor/ccan/json/json.o $(LDNSLIBS) $(LIBS)
+	$Q$(LINK) -o $@ $(BUILD)test/json.o $(BUILD)riggerd/connection_list.o  $(BUILD)riggerd/fwd_zones.o $(BUILD)riggerd/string_list.o  $(BUILD)riggerd/log.o $(BUILD)vendor/ccan/json/json.o $(LDNSLIBS) $(LIBS) -lcmocka
 
 example.conf:	$(srcdir)/example.conf.in Makefile
 	rm -f $@

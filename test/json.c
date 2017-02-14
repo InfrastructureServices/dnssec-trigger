@@ -1,3 +1,8 @@
+#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,6 +10,7 @@
 #include "../riggerd/fwd_zones.h"
 #include "../riggerd/connection_list.h"
 #include "../riggerd/string_list.h"
+#include "../riggerd/string_buffer.h"
 #include "../vendor/ccan/json/json.h"
 
 char *json = 
@@ -51,29 +57,46 @@ char *json =
 "\n    ]"
 "\n}\n";
 
+/* A test case that does nothing and succeeds. */
+static void null_test_success(void **state) {
+    (void) state; /* unused */
+}
+
+/* A test case that does nothing and succeeds. */
+static void null_test_fail(void **state) {
+    assert_non_null(NULL);
+}
+
 int main() {
-    printf("Test json parser:\n%s\n", json);
-    struct nm_connection_list l = yield_connections_from_json(json);
-    nm_connection_list_dbg_print(&l);
-    printf("Length is: %zu\n", nm_connection_list_length(&l));
-    struct nm_connection_list l2 = nm_connection_list_filter(&l, 0);
-    printf("Length is: %zu\n", nm_connection_list_length(&l2));
-    struct nm_connection_list l3 = nm_connection_list_filter(&l, 1, &nm_connection_filter_type_vpn);
-    printf("Length is: %zu\n", nm_connection_list_length(&l3));
-    struct nm_connection_list l4 = nm_connection_list_filter(&l, 1, &nm_connection_filter_default);
-    printf("Length is: %zu\n", nm_connection_list_length(&l4));
-    struct nm_connection_list l5 = nm_connection_list_filter(&l, 2, &nm_connection_filter_type_other, &nm_connection_filter_default);
-    printf("Length is: %zu\n", nm_connection_list_length(&l5));
-    struct nm_connection_list l6 = nm_connection_list_filter(&l, 2, &nm_connection_filter_type_vpn, &nm_connection_filter_default);
-    printf("Length is: %zu\n", nm_connection_list_length(&l6));
+    // printf("Test json parser:\n%s\n", json);
+    // struct nm_connection_list l = yield_connections_from_json(json);
+    // nm_connection_list_dbg_print(&l);
+    // printf("Length is: %zu\n", nm_connection_list_length(&l));
+    // struct nm_connection_list l2 = nm_connection_list_filter(&l, 0);
+    // printf("Length is: %zu\n", nm_connection_list_length(&l2));
+    // struct nm_connection_list l3 = nm_connection_list_filter(&l, 1, &nm_connection_filter_type_vpn);
+    // printf("Length is: %zu\n", nm_connection_list_length(&l3));
+    // struct nm_connection_list l4 = nm_connection_list_filter(&l, 1, &nm_connection_filter_default);
+    // printf("Length is: %zu\n", nm_connection_list_length(&l4));
+    // struct nm_connection_list l5 = nm_connection_list_filter(&l, 2, &nm_connection_filter_type_other, &nm_connection_filter_default);
+    // printf("Length is: %zu\n", nm_connection_list_length(&l5));
+    // struct nm_connection_list l6 = nm_connection_list_filter(&l, 2, &nm_connection_filter_type_vpn, &nm_connection_filter_default);
+    // printf("Length is: %zu\n", nm_connection_list_length(&l6));
 
-    char *buffer = nm_connection_list_sprint_servers(&l);
-    printf("Servers: %s\n", buffer);
-    free(buffer);
+    // {
+    // struct string_buffer buffer = nm_connection_list_sprint_servers(&l);
+    // printf("Servers: %s\n", buffer.string);
+    // free(buffer.string);
+    // }
 
-    buffer = calloc_or_die(1000);
-    string_list_sprint(&l.first->self->servers, buffer, 1000);
-    printf("%s\n", buffer);
-    free(buffer);
-    nm_connection_list_clear(&l);
+    // char *buffer = calloc_or_die(1000);
+    // string_list_sprint(&l.first->self->servers, buffer, 1000);
+    // printf("%s\n", buffer);
+    // free(buffer);
+    // nm_connection_list_clear(&l);
+    const struct CMUnitTest tests[] = {
+	cmocka_unit_test(null_test_success),
+	cmocka_unit_test(null_test_fail),
+    };
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }
