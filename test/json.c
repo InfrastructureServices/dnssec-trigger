@@ -96,7 +96,6 @@ int main() {
     // nm_connection_list_clear(&l);
     const struct CMUnitTest tests[] = {
 	cmocka_unit_test(null_test_success),
-	cmocka_unit_test(null_test_fail),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
