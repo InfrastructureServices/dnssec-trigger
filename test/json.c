@@ -95,9 +95,6 @@ int main() {
     // free(buffer);
     // nm_connection_list_clear(&l);
     
-    char *test = malloc(5);
-    test[6] = 'a';
-
     const struct CMUnitTest tests[] = {
 	cmocka_unit_test(null_test_success),
     };
