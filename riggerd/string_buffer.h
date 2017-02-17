@@ -9,12 +9,17 @@
  * Just a fat pointer wrapping char pointer
  */
 struct string_buffer {
-        /** String itself */
-	char* string;
-	/** Length of the string buffer */
-	size_t length;
+    /** String itself */
+    char* string;
+    /** Length of the string buffer */
+    size_t length;
 };
 
+#define string_builder(STR)  \
+{                            \
+    .string = (STR),         \
+    .length = sizeof((STR)), \
+}
 
 #endif /* STRING_BUFFER_H */
 

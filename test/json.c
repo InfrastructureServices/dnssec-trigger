@@ -65,6 +65,32 @@ static void null_test_success(void **state) {
 /* A test case that does nothing and succeeds. */
 static void null_test_fail(void **state) {
     assert_non_null(NULL);
+    (void) state; /* unused */
+}
+
+static void load_json_into_list_and_test_length(void **state) {
+    struct nm_connection_list l = yield_connections_from_json(json);
+    assert_true(nm_connection_list_length(&l) == 3);
+    nm_connection_list_clear(&l);
+    (void) state; /* unused */
+}
+
+static void filter_connection_list_and_test_length0(void **state) {
+    struct nm_connection_list l = yield_connections_from_json(json);
+    struct nm_connection_list l2 = nm_connection_list_filter(&l, 0);
+    assert_true(nm_connection_list_length(&l2) == 3);
+    nm_connection_list_clear(&l2);
+    nm_connection_list_clear(&l);
+    (void) state; /* unused */
+}
+
+static void filter_connection_list_and_test_length1(void **state) {
+    struct nm_connection_list l = yield_connections_from_json(json);
+    struct nm_connection_list l2 = nm_connection_list_filter(&l, 1, &nm_connection_filter_type_vpn);
+    assert_true(nm_connection_list_length(&l2) == 1);
+    nm_connection_list_clear(&l2);
+    nm_connection_list_clear(&l);
+    (void) state; /* unused */
 }
 
 int main() {
@@ -94,9 +120,12 @@ int main() {
     // printf("%s\n", buffer);
     // free(buffer);
     // nm_connection_list_clear(&l);
-    
+
     const struct CMUnitTest tests[] = {
-	cmocka_unit_test(null_test_success),
+        cmocka_unit_test(null_test_success),
+        cmocka_unit_test(load_json_into_list_and_test_length),
+        cmocka_unit_test(filter_connection_list_and_test_length0),
+        cmocka_unit_test(filter_connection_list_and_test_length1),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

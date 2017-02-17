@@ -92,7 +92,7 @@ autom4te.cache
 config.log
 config.status
 
-!dnssec-trigger.tmpfiles.d
+#!dnssec-trigger.tmpfiles.d
 
 ## Build targets
 01-dnssec-trigger
@@ -108,3 +108,4 @@ example.conf
 
 test/*
 !test/*.c
+
