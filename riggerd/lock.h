@@ -23,6 +23,6 @@ void lock_release();
  * stores the pointer, it does not copy the content, so the content must
  * live as long as the lock is used.
  */
-void lock_override(char *path, size_t len);
+void lock_override(const char *path, size_t len);
 
 #endif /* LOCK_H */

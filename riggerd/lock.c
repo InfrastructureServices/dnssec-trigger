@@ -39,6 +39,9 @@ void lock_acquire() {
 }
 
 void lock_release() {
+    if (fd == 0) {
+        return;
+    }
     struct flock f = {
         .l_type=F_UNLCK,
         .l_whence=SEEK_SET,
@@ -55,7 +58,7 @@ void lock_release() {
     fd = 0;
 }
 
-void lock_override(char *path, size_t len) {
+void lock_override(const char *path, size_t len) {
     LF_PATH = path;
     LF_PATH_LEN = len;
     check_dir = false;
