@@ -153,7 +153,7 @@ RIGGERD_SRC+=osx/wakelist.c
 LDNSLIBS+=-framework IOKit -framework CoreFoundation
 endif
 ifeq "$(FWD_ZONES_SUPPORT)" "yes"
-RIGGERD_SRC+= vendor/ccan/json/json.c riggerd/string_list.c riggerd/connection_list.c riggerd/fwd_zones.c
+RIGGERD_SRC+= vendor/ccan/json/json.c riggerd/string_list.c riggerd/connection_list.c riggerd/fwd_zones.c riggerd/lock.c
 endif
 RIGGERD_OBJ=$(addprefix $(BUILD),$(RIGGERD_SRC:.c=.o)) $(COMPAT_OBJ)
 TESTS_SRC=test/json.c
