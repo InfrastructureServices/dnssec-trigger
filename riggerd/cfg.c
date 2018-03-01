@@ -375,6 +375,12 @@ keyword(struct cfg* cfg, char* p)
 			&cfg->num_http_urls, get_arg(p+4));
 	} else if(strncmp(p, "check-updates:", 14) == 0) {
 		bool_arg(&cfg->check_updates, p+14);
+	} else if(strncmp(p, "use_vpn_forwarders:", 19) == 0) {
+		cfg->use_vpn_forwarders = atoi(get_arg(p+19));
+		/* In case of any other value than 0 or 1, use it like 1 */
+		if (cfg->use_vpn_forwarders != 0) {
+			cfg->use_vpn_forwarders = 1;
+		}
 	} else {
 		return 0;
 	}
@@ -428,6 +434,8 @@ struct cfg* cfg_create(const char* cfgfile)
 	cfg->pidfile = strdup(PIDFILE);
 	cfg->resolvconf = strdup("/etc/resolv.conf");
 	cfg->check_updates = (strcmp(CHECK_UPDATES, "yes")==0);
+	/* Don't use it by default */
+	cfg->use_vpn_forwarders = 0;
 
 	if(!cfg->unbound_control || !cfg->pidfile || !cfg->server_key_file ||
 		!cfg->server_cert_file || !cfg->control_key_file ||

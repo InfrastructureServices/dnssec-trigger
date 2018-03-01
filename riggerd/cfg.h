@@ -112,6 +112,10 @@ struct cfg {
 	char* control_key_file;
 	/** certificate file for control */
 	char* control_cert_file;
+
+	/** use DNS forwarders provided by VPN connection instead of the forwarders
+	 * from the default connection. Use 0 or 1 to indicate the value. */
+	int use_vpn_forwarders;
 };
 
 /** simple list of strings */
