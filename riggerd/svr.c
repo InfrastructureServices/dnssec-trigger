@@ -797,16 +797,11 @@ static void handle_submit(char* ips)
 
 #ifdef FWD_ZONES_SUPPORT
 static void handle_update_all(char *json) {
+	/* Parse the JSON string received from the script and create a list of active connections.
+	 * e.g. Ethernet with some IP address, forward zones and DNS servers, Wi-Fi connection or
+	 * corporate VPN. */
     struct nm_connection_list original =  yield_connections_from_json(json);
-    struct nm_connection_list defaults = nm_connection_list_filter(&original, 1, &nm_connection_filter_default);
-    struct string_buffer global_forward_candidates = nm_connection_list_sprint_servers(&defaults);
-    probe_start(global_forward_candidates.string);
-
-
-    // Cleanup:
-    free(global_forward_candidates.string);
-
-    nm_connection_list_clear(&defaults);
+	update_global_forwarders(&original);
     nm_connection_list_clear(&original);
 
     // ConnectionChain *connections = parse_connections(json);
@@ -820,6 +815,29 @@ static void handle_update_all(char *json) {
     //deprecated todo: at app ending/closing free global_forwarders and stored_zones
     //this should be handled by svr_delete where it is implemented, so if app handles svr_deleting this todo is done
 }
+
+static void update_global_forwarders(struct nm_connection_list *original) {
+	/* Default connections in this case are those, that are used for DNS queries by default. In
+	 * other words, all DNS queries goes into this connection. We let the user choose whether they
+	 * want to use VPN or "default" (in NetworkManager jargon) connection for this purpose. The reason
+	 * for this option is that the VPN connection should be secure, but on the other hand, we don't
+	 * want to expose our DNS traffic to our employer, for example. */
+	struct nm_connection_list defaults;
+	if (!global_svr->cfg->use_vpn_forwarders) {
+		defaults = nm_connection_list_filter(&original, 1, &nm_connection_filter_default);
+	} else {
+		defaults = nm_connection_list_filter(&original, 1, &nm_connection_filter_type_vpn);
+	}
+	/* Probe function takes a string of space separated servers :-) */
+    struct string_buffer global_forward_candidates = nm_connection_list_sprint_servers(&defaults);
+    probe_start(global_forward_candidates.string);
+
+    // Cleanup:
+    free(global_forward_candidates.string);
+
+    nm_connection_list_clear(&defaults);
+}
+
 #endif
 
 /** append update signal to buffer to send */
