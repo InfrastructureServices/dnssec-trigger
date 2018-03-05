@@ -153,7 +153,7 @@ RIGGERD_SRC+=osx/wakelist.c
 LDNSLIBS+=-framework IOKit -framework CoreFoundation
 endif
 ifeq "$(FWD_ZONES_SUPPORT)" "yes"
-RIGGERD_SRC+= vendor/ccan/json/json.c riggerd/string_list.c riggerd/connection_list.c riggerd/fwd_zones.c riggerd/lock.c
+RIGGERD_SRC+= vendor/ccan/json/json.c riggerd/string_list.c riggerd/connection_list.c riggerd/fwd_zones.c riggerd/lock.c riggerd/store.c
 endif
 RIGGERD_OBJ=$(addprefix $(BUILD),$(RIGGERD_SRC:.c=.o)) $(COMPAT_OBJ)
 TESTS_SRC=test/json.c test/other.c
@@ -199,7 +199,7 @@ test/json-test$(EXEEXT):	$(RIGGERD_OBJ) $(TESTS_OBJ)
 
 test/other-test$(EXEEXT):	$(RIGGERD_OBJ) $(TESTS_OBJ)
 	$(INFO) Link $@
-	$Q$(LINK) -o $@ $(BUILD)test/other.o $(BUILD)riggerd/lock.o $(LDNSLIBS) $(LIBS) -lcmocka
+	$Q$(LINK) -o $@ $(BUILD)test/other.o $(BUILD)riggerd/lock.o $(BUILD)riggerd/store.o $(LDNSLIBS) $(LIBS) -lcmocka
 
 example.conf:	$(srcdir)/example.conf.in Makefile
 	rm -f $@
