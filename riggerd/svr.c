@@ -830,8 +830,9 @@ static void update_global_forwarders(struct nm_connection_list *original) {
 	}
 	/* Probe function takes a string of space separated servers :-) */
     struct string_buffer global_forward_candidates = nm_connection_list_sprint_servers(&defaults);
+	lock_acquire();
     probe_start(global_forward_candidates.string);
-
+	lock_release();
     // Cleanup:
     free(global_forward_candidates.string);
 
