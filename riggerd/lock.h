@@ -1,3 +1,9 @@
+/**
+ * Syncronization primitive to be used by the daemon and script in
+ * order serialize execution. So far it should be just 1:1 rewrite of
+ * the Python implementation.
+ */
+
 #include "config.h"
 
 #if !defined LOCK_H && defined FWD_ZONES_SUPPORT
