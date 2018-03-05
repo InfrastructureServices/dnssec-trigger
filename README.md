@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/msehnout/dnssec-trigger-fedora.svg?branch=master)](https://travis-ci.org/msehnout/dnssec-trigger-fedora)
+[![Build Status](https://travis-ci.org/InfrastructureServices/dnssec-trigger.svg?branch=master-fedora)](https://travis-ci.org/InfrastructureServices/dnssec-trigger)
 
 # DNSSEC-trigger
 
