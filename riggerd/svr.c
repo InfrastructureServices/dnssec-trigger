@@ -53,6 +53,7 @@
 #endif
 #ifdef FWD_ZONES_SUPPORT
 #include "fwd_zones.h"
+#include "lock.h"
 #endif
 
 struct svr* global_svr = NULL;
@@ -67,6 +68,7 @@ static void sslconn_shutdown(struct sslconn* sc);
 static void sslconn_command(struct sslconn* sc);
 static void sslconn_persist_command(struct sslconn* sc);
 static void send_results_to_con(struct svr* svr, struct sslconn* s);
+static void update_global_forwarders(struct nm_connection_list *original);
 
 struct svr* svr_create(struct cfg* cfg)
 {
@@ -824,9 +826,9 @@ static void update_global_forwarders(struct nm_connection_list *original) {
 	 * want to expose our DNS traffic to our employer, for example. */
 	struct nm_connection_list defaults;
 	if (!global_svr->cfg->use_vpn_forwarders) {
-		defaults = nm_connection_list_filter(&original, 1, &nm_connection_filter_default);
+		defaults = nm_connection_list_filter(original, 1, &nm_connection_filter_default);
 	} else {
-		defaults = nm_connection_list_filter(&original, 1, &nm_connection_filter_type_vpn);
+		defaults = nm_connection_list_filter(original, 1, &nm_connection_filter_type_vpn);
 	}
 	/* Probe function takes a string of space separated servers :-) */
     struct string_buffer global_forward_candidates = nm_connection_list_sprint_servers(&defaults);
