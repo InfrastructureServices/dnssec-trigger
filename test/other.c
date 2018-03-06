@@ -41,7 +41,6 @@ static void lock_file_check_file_permissions(void **state) {
     (void) state; /* unused */
 }
 
-/* test in the function name is to avoid name conflicts */
 static void store_macro_creation(void **state) {
     struct store s = STORE_INIT("test");
     assert_true(strcmp(s.dir, "/var/run/dnssec-trigger") == 0);
@@ -50,12 +49,27 @@ static void store_macro_creation(void **state) {
     (void) state; /* unused */
 }
 
+static void store_read_file_content(void **state) {
+    const char *file_name = "test/servers-list-ipv4";
+    assert_true(access(file_name, R_OK) == 0);
+
+    struct store s = store_init("", "test/servers-list-ipv4", "");
+
+    string_list_dbg_print(&s.cache);
+
+    assert_true(string_list_contains(&s.cache, "1.2.3.4", 8));
+    assert_true(string_list_contains(&s.cache, "192.168.168.168", 15));
+    
+    (void) state; /* unused */
+}
+
 int main() {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(lock_file_call_fn),
         cmocka_unit_test(lock_file_check_file_presence),
         cmocka_unit_test(lock_file_check_file_permissions),
-        cmocka_unit_test(store_macro_creation)
+        cmocka_unit_test(store_macro_creation),
+        cmocka_unit_test(store_read_file_content)
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
