@@ -33,6 +33,11 @@ struct store {
 struct store store_init(const char *dir, const char *full_path, const char *full_path_tmp);
 
 /**
+ * Write the cache back to disk into file specified in the 'path' member
+ */
+int store_commit(const struct store *self);
+
+/**
  * Macro that wraps up the init function in order to reduce typing.
  */
 #define STORE_INIT(NAME) store_init((STORE_BASE_DIR),(STORE_PATH(NAME)),(STORE_PATH_TMP(NAME)))

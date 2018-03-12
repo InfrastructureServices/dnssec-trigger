@@ -32,4 +32,5 @@ env:
 script:
   - ./configure --with-forward-zones-support 
   - make 
+  - mkdir test/tmp
   - make test

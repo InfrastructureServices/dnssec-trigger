@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 
 #include "config.h"
 #include "store.h"
@@ -37,5 +38,21 @@ struct store store_init(const char *dir, const char *full_path, const char *full
         memset(line, 0, line_len);
     }
     free(line);
+    fclose(fp);
     return s;
+}
+
+int store_commit(const struct store *self) {
+    // Open the tmp file
+    FILE *fp = fopen(self->path_tmp, "w");
+    if (fp == NULL) {
+        return -1;
+    }
+    // Write its content
+    FOR_EACH_STRING_IN_LIST(iter, &self->cache) {
+        fprintf(fp, "%s\n", iter->string);
+    }
+    // Close it
+    fclose(fp);
+    return rename(self->path_tmp, self->path);
 }

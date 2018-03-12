@@ -9,6 +9,7 @@
 
 #include "../riggerd/lock.h"
 #include "../riggerd/store.h"
+#include "../riggerd/string_buffer.h"
 
 static void lock_file_call_fn(void **state) {
     lock_override("/tmp/dnssec0123456789", 21);
@@ -62,13 +63,41 @@ static void store_read_file_content(void **state) {
     (void) state; /* unused */
 }
 
+static void store_commit_cache(void **state) {
+    const char *dir_name = "test/tmp";
+    const char *file_name = "test/tmp/commit-cache";
+    const char *tmp_file_name = "test/tmp/commit-cache.tmp";
+    struct string_buffer sb = string_builder("5.6.7.8");
+    struct string_buffer sb2 = string_builder("9.10.11.12");
+
+    // write to file
+    {
+        struct store s = store_init(dir_name, file_name, tmp_file_name);
+        string_list_clear(&s.cache);
+        string_list_push_back(&s.cache, sb.string, sb.length);
+        string_list_push_back(&s.cache, sb2.string, sb2.length);
+        store_commit(&s);
+    }
+
+    // read from file
+    {
+        struct store s = store_init(dir_name, file_name, tmp_file_name);
+        assert_true(string_list_contains(&s.cache, sb.string, sb.length));
+        assert_true(string_list_contains(&s.cache, sb2.string, sb2.length));
+        assert_true(string_list_length(&s.cache) == 2);
+    }
+    
+    (void) state; /* unused */
+}
+
 int main() {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(lock_file_call_fn),
         cmocka_unit_test(lock_file_check_file_presence),
         cmocka_unit_test(lock_file_check_file_permissions),
         cmocka_unit_test(store_macro_creation),
-        cmocka_unit_test(store_read_file_content)
+        cmocka_unit_test(store_read_file_content),
+        cmocka_unit_test(store_commit_cache)
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

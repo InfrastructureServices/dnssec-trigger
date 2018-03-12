@@ -40,6 +40,7 @@ void string_list_clear(struct string_list* list)
 		free(node->string);
 		free(node);
 	}
+	list->first = NULL;
 }
 
 void* calloc_or_die(size_t size) {
@@ -115,7 +116,7 @@ bool string_list_is_equal(const struct string_list* l1, const struct string_list
 	if ((NULL == l1 && NULL != l2) || (NULL == l2 && NULL != l1))
 		return false;
 
-	// Every value is unique
+	// Assumption: Every value is unique
 	if (string_list_length(l1) != string_list_length(l2)) {
 		return false;
 	}
