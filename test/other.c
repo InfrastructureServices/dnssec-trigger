@@ -59,6 +59,8 @@ static void store_read_file_content(void **state) {
     assert_true(string_list_contains(&s.cache, "1.2.3.4", 8));
     assert_true(string_list_contains(&s.cache, "192.168.168.168", 15));
     assert_true(string_list_length(&s.cache) == 2);
+
+    store_destroy(&s);
     
     (void) state; /* unused */
 }
@@ -77,6 +79,7 @@ static void store_commit_cache(void **state) {
         string_list_push_back(&s.cache, sb.string, sb.length);
         string_list_push_back(&s.cache, sb2.string, sb2.length);
         store_commit(&s);
+        store_destroy(&s);
     }
 
     // read from file
@@ -85,6 +88,7 @@ static void store_commit_cache(void **state) {
         assert_true(string_list_contains(&s.cache, sb.string, sb.length));
         assert_true(string_list_contains(&s.cache, sb2.string, sb2.length));
         assert_true(string_list_length(&s.cache) == 2);
+        store_destroy(&s);
     }
     
     (void) state; /* unused */

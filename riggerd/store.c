@@ -56,3 +56,7 @@ int store_commit(const struct store *self) {
     fclose(fp);
     return rename(self->path_tmp, self->path);
 }
+
+void store_destroy(struct store *self) {
+    string_list_clear(&self->cache);
+}
