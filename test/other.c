@@ -55,10 +55,9 @@ static void store_read_file_content(void **state) {
 
     struct store s = store_init("", "test/servers-list-ipv4", "");
 
-    string_list_dbg_print(&s.cache);
-
     assert_true(string_list_contains(&s.cache, "1.2.3.4", 8));
     assert_true(string_list_contains(&s.cache, "192.168.168.168", 15));
+    assert_true(string_list_length(&s.cache) == 2);
     
     (void) state; /* unused */
 }

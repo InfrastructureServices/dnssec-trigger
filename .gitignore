@@ -106,6 +106,6 @@ dnssec-triggerd
 dnssec-triggerd.service
 example.conf
 
-test/*
-!test/*.c
 
+test/other-test
+test/json-test
