@@ -67,6 +67,15 @@ void string_list_push_back(struct string_list* list, const char* new_value, cons
  */
 bool string_list_contains(const struct string_list* list, const char* value, const size_t buffer_size);
 
+
+/**
+ * Find out whether the list contains the given value and remove it
+ * @param list: List to check
+ * @param new_value: String to be removed
+ * @param buffer_size: Size of the string buffer
+ */
+void string_list_remove(struct string_list* list, const char* value, const size_t buffer_size);
+
 /**
  * Find out the size of given list
  * @param list: List to check

@@ -107,4 +107,13 @@ void hook_unbound_tcp_upstream(struct cfg* cfg, int tcp80_ip4, int tcp80_ip6,
  */
 void hook_unbound_ssl_upstream(struct cfg* cfg, int ssl443_ip4, int ssl443_ip6);
 
+#ifdef FWD_ZONES_SUPPORT
+
+/**
+ * 
+ */
+void hook_unbound_list_forwards(struct cfg* cfg);
+
+#endif
+
 #endif /* UBHOOKS_H */

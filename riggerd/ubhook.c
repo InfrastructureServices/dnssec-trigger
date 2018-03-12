@@ -293,3 +293,11 @@ void hook_unbound_ssl_upstream(struct cfg* cfg, int ssl443_ip4, int ssl443_ip6)
 	}
 	ub_has_ssl_upstream = 1;
 }
+
+#ifdef FWD_ZONES_SUPPORT
+
+void hook_unbound_list_forwards(struct cfg* cfg) {
+	
+}
+
+#endif

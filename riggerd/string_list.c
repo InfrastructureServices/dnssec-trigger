@@ -50,6 +50,8 @@ void* calloc_or_die(size_t size) {
 	} else {
 		return mem;
 	}
+	// Cannot reach this point
+	return NULL;
 }
 
 void string_list_push_back(struct string_list* list, const char* new_value, const size_t buffer_size)
@@ -92,6 +94,38 @@ bool string_list_contains(const struct string_list* list, const char* value, con
 		}
 	}
 	return false;
+}
+
+void string_list_remove(struct string_list* list, const char* value, const size_t buffer_size) {
+	if (NULL == list || NULL == value || buffer_size == 0) {
+		return;
+	}
+
+	size_t len = strnlen(value, buffer_size);
+
+	/*
+	 * Iterate through the whole list
+	 */
+	struct string_entry* prev = NULL;
+	bool first = true;
+	for (struct string_entry* iter = list->first; NULL != iter; prev = iter, iter = iter->next) {
+		/*
+		 * We already know size of both buffers, so we take advantage of that
+		 * and also of short-cut evaluation.
+		 */
+		if (len == iter->length && strncmp(iter->string, value, len) == 0) {
+			// Remove the item
+			if (first) {
+				list->first = iter->next;
+			} else {
+				prev->next = iter->next;
+			}
+			free(iter->string);
+			free(iter);
+			return;
+		}
+		first = false;
+	}
 }
 
 size_t string_list_length(const struct string_list* list)

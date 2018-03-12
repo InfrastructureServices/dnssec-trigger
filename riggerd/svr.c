@@ -54,6 +54,7 @@
 #ifdef FWD_ZONES_SUPPORT
 #include "fwd_zones.h"
 #include "lock.h"
+#include "store.h"
 #endif
 
 struct svr* global_svr = NULL;
@@ -69,6 +70,7 @@ static void sslconn_command(struct sslconn* sc);
 static void sslconn_persist_command(struct sslconn* sc);
 static void send_results_to_con(struct svr* svr, struct sslconn* s);
 static void update_global_forwarders(struct nm_connection_list *original);
+static void update_connection_zones(struct nm_connection_list *original);
 
 struct svr* svr_create(struct cfg* cfg)
 {
@@ -804,6 +806,7 @@ static void handle_update_all(char *json) {
 	 * corporate VPN. */
     struct nm_connection_list original =  yield_connections_from_json(json);
 	update_global_forwarders(&original);
+	update_connection_zones(&original);
     nm_connection_list_clear(&original);
 
     // ConnectionChain *connections = parse_connections(json);
@@ -839,6 +842,14 @@ static void update_global_forwarders(struct nm_connection_list *original) {
     free(global_forward_candidates.string);
 
     nm_connection_list_clear(&defaults);
+}
+
+static void update_connection_zones(struct nm_connection_list *connections) {
+	struct store stored_zones = STORE_INIT("zones");
+	FOR_EACH_STRING_IN_LIST(iter, &stored_zones.cache) {
+		
+	}
+	return;
 }
 
 #endif

@@ -10,6 +10,43 @@
 #include "../riggerd/lock.h"
 #include "../riggerd/store.h"
 #include "../riggerd/string_buffer.h"
+#include "../riggerd/string_list.h"
+
+static void string_list_test_remove_at_the_beginning(void **state) {
+    struct string_list test;
+    string_list_init(&test);
+    string_list_push_back(&test, "aaa", 3);
+    string_list_push_back(&test, "bbb", 3);
+    string_list_push_back(&test, "ccc", 3);
+    string_list_remove(&test, "aaa", 3);
+    assert_int_equal((int) string_list_length(&test), 2);
+    string_list_clear(&test);
+    (void) state; /* unused */
+}
+
+static void string_list_test_remove_in_the_middle(void **state) {
+    struct string_list test;
+    string_list_init(&test);
+    string_list_push_back(&test, "aaa", 3);
+    string_list_push_back(&test, "bbb", 3);
+    string_list_push_back(&test, "ccc", 3);
+    string_list_remove(&test, "bbb", 3);
+    assert_int_equal((int) string_list_length(&test), 2);
+    string_list_clear(&test);
+    (void) state; /* unused */
+}
+
+static void string_list_test_remove_at_the_end(void **state) {
+    struct string_list test;
+    string_list_init(&test);
+    string_list_push_back(&test, "aaa", 3);
+    string_list_push_back(&test, "bbb", 3);
+    string_list_push_back(&test, "ccc", 3);
+    string_list_remove(&test, "aaa", 3);
+    assert_int_equal((int) string_list_length(&test), 2);
+    string_list_clear(&test);
+    (void) state; /* unused */
+}
 
 static void lock_file_call_fn(void **state) {
     lock_override("/tmp/dnssec0123456789", 21);
@@ -96,6 +133,9 @@ static void store_commit_cache(void **state) {
 
 int main() {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(string_list_test_remove_at_the_beginning),
+        cmocka_unit_test(string_list_test_remove_in_the_middle),
+        cmocka_unit_test(string_list_test_remove_at_the_end),
         cmocka_unit_test(lock_file_call_fn),
         cmocka_unit_test(lock_file_check_file_presence),
         cmocka_unit_test(lock_file_check_file_permissions),
