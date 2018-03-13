@@ -163,16 +163,27 @@ bool string_list_is_equal(const struct string_list* l1, const struct string_list
 	return true;
 }
 
-void string_list_dbg_print(const struct string_list* list)
+void string_list_dbg_print_inner(const struct string_list* list, FILE *fp)
 {
     if (NULL == list)
         return;
 
+	//fprintf(stderr, "DBG: %d, %d, %zu\n", list, list->first, list->first->length);
+
     struct string_entry *iter = list->first;
     while(NULL != iter) {
-        printf("%s, ", iter->string);
+        fprintf(fp, "%s, ", iter->string);
         iter = iter->next;
     }
+}
+
+void string_list_dbg_print(const struct string_list* list)
+{
+    string_list_dbg_print_inner(list, stdout);
+}
+
+void string_list_dbg_eprint(const struct string_list* list){
+	string_list_dbg_print_inner(list, stderr);
 }
 
 int string_list_sprint(const struct string_list* list, char *buffer, size_t len)

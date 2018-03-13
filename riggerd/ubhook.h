@@ -40,6 +40,12 @@
  * DNSSEC resolver.
  */
 
+#ifdef FWD_ZONES_SUPPORT
+
+#include "connection_list.h"
+
+#endif
+
 #ifndef UBHOOKS_H
 #define UBHOOKS_H
 struct cfg;
@@ -112,7 +118,12 @@ void hook_unbound_ssl_upstream(struct cfg* cfg, int ssl443_ip4, int ssl443_ip6);
 /**
  * 
  */
-void hook_unbound_list_forwards(struct cfg* cfg);
+struct nm_connection_list hook_unbound_list_forwards(struct cfg* cfg);
+
+/**
+ * For testing purposes only.
+ */
+struct nm_connection_list hook_unbound_list_forwards_inner(struct cfg* cfg, FILE *fp);
 
 #endif
 

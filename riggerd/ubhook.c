@@ -296,8 +296,87 @@ void hook_unbound_ssl_upstream(struct cfg* cfg, int ssl443_ip4, int ssl443_ip6)
 
 #ifdef FWD_ZONES_SUPPORT
 
-void hook_unbound_list_forwards(struct cfg* cfg) {
+struct nm_connection_list hook_unbound_list_forwards(struct cfg* cfg) {
+	FILE *fp;
+	fp = popen("unbound-control list_forwards", "r");
+	struct nm_connection_list ret = hook_unbound_list_forwards_inner(cfg, fp);
+	fclose(fp);
+	return ret;
+}
+
+struct nm_connection_list hook_unbound_list_forwards_inner(struct cfg* cfg, FILE *fp) {
+	// TODO: is there any other output??
+	// Format: <ZONE> IN forward [+i] <list of addresses>
 	
+	struct nm_connection_list ret;
+	nm_connection_list_init(&ret);
+	struct nm_connection *new;
+
+	size_t line_len = 1024;
+    ssize_t read_len = 0;
+    char *line = (char *)calloc_or_die(line_len);
+    memset(line, 0, line_len);
+    while ((read_len = getline(&line, &line_len, fp) != -1)){
+		// XXX: line len is always 1??
+		size_t i = 0;
+		int parser_state = 0;
+		size_t start = 0;
+		bool run = true;
+		new = (struct nm_connection *) calloc_or_die(sizeof(struct nm_connection));
+		nm_connection_init(new);
+		//fprintf(stderr, "\nline: %s", line);
+		while(run) {
+			switch (parser_state) {
+				case 0:
+					while (line[i] != ' ') {
+						++i;
+					}
+					string_list_push_back(&new->zones, &line[start], i-start);
+					++i;
+					parser_state = 1;
+					break;
+				case 1:
+				/* fallthrough */
+				case 2:
+					while (line[i] != ' ') {
+						++i;
+					}
+					++i;
+					++parser_state;
+					break;
+				default:
+					if (line[i] == '+') {
+						//fprintf(stderr, "line2: %s", &line[i]);
+						i += 3;
+						// INSECURE
+					} else {
+						start = i;
+						//fprintf(stderr, "line3: %s", &line[i]);
+						while (line[i] != ' ' && line[i] != '\n') {
+							++i;
+							if (line[i] == '\n') {
+								//fprintf(stderr, "line4: %s", &line[i]);
+								run = false;
+								break;
+							}
+						}
+						string_list_push_back(&new->servers, &line[start], i-start);
+						++i;
+					}
+				break;
+			}
+		}
+		//fprintf(stderr, "zones: \n");
+		//string_list_dbg_eprint(&new.zones);
+		//fprintf(stderr, "servers: \n");
+		//string_list_dbg_eprint(&new.servers);
+		//nm_connection_list_dbg_eprint(&ret);
+		nm_connection_list_push_back(&ret, new);
+		//nm_connection_list_dbg_eprint(&ret);
+		memset(line, 0, line_len);
+	}
+	free(line);
+	return ret;
 }
 
 #endif

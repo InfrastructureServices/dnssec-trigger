@@ -113,6 +113,14 @@ void nm_connection_list_clear(struct nm_connection_list *list);
 void nm_connection_list_push_back(struct nm_connection_list *list, struct nm_connection *new_value);
 
 /**
+ * Search for a zone with given name and return if it is present or not
+ * @param list: List to search through
+ * @param zone: Zone name
+ * @param len: Zone name length
+ */
+bool nm_connection_list_contains_zone(struct nm_connection_list *list, char *zone, size_t len);
+
+/**
  * Filter connections list and return a new non-owning one, which contains only those connections
  * that satisfy **all** filters.
  * @param list: Original list (will be a superset to the new one)
@@ -133,6 +141,12 @@ size_t nm_connection_list_length(struct nm_connection_list *list);
  * @param list: List to be printed
  */
 void nm_connection_list_dbg_print(struct nm_connection_list *list);
+
+/**
+ * Print the whole list onto stderr.
+ * @param list: List to be printed
+ */
+void nm_connection_list_dbg_eprint(struct nm_connection_list *list);
 
 /**
  * Print all servers into char buffer. The caller is reposinble for releasing the

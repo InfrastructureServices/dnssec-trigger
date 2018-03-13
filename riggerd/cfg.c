@@ -381,6 +381,12 @@ keyword(struct cfg* cfg, char* p)
 		if (cfg->use_vpn_forwarders != 0) {
 			cfg->use_vpn_forwarders = 1;
 		}
+	} else if(strncmp(p, "use_private_address_ranges:", 27) == 0) {
+		cfg->use_private_address_ranges = atoi(get_arg(p+19));
+		/* In case of any other value than 0 or 1, use it like 1 */
+		if (cfg->use_private_address_ranges != 0) {
+			cfg->use_private_address_ranges = 1;
+		}
 	} else {
 		return 0;
 	}

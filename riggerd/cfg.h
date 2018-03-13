@@ -116,6 +116,10 @@ struct cfg {
 	/** use DNS forwarders provided by VPN connection instead of the forwarders
 	 * from the default connection. Use 0 or 1 to indicate the value. */
 	int use_vpn_forwarders;
+
+	/** TODO: write documentation
+	 * */
+	int use_private_address_ranges;
 };
 
 /** simple list of strings */

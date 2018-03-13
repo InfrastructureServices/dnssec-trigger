@@ -71,6 +71,11 @@ void nm_connection_list_push_back(struct nm_connection_list *list, struct nm_con
     // new_value is now owned by connection list => it will be freed with the list
 }
 
+bool nm_connection_list_contains_zone(struct nm_connection_list *list, char *zone, size_t len) {
+    // TODO: implement
+    return false;
+}
+
 struct nm_connection_list nm_connection_list_filter(struct nm_connection_list *list,
         unsigned int count, ...)
 {
@@ -125,7 +130,7 @@ size_t nm_connection_list_length(struct nm_connection_list *list)
     return counter;
 }
 
-void nm_connection_list_dbg_print(struct nm_connection_list *list)
+static void nm_connection_list_dbg_print_inner(struct nm_connection_list *list, FILE *fp)
 {
     if (NULL == list)
         return;
@@ -133,44 +138,54 @@ void nm_connection_list_dbg_print(struct nm_connection_list *list)
     struct nm_connection_node *iter = list->first;
     int n = 0;
     while (NULL != iter) {
-        printf("Connection %d\n", n);
-        printf("default: ");
+        fprintf(fp, "Connection %d\n", n);
+        fprintf(fp, "default: ");
         if (true == iter->self->default_con) {
-            printf("yes\n");
+            fprintf(fp, "yes\n");
         } else {
-            printf("no\n");
+            fprintf(fp, "no\n");
         }
-        printf("type: ");
+        fprintf(fp, "type: ");
         switch (iter->self->type) {
             case NM_CON_VPN:
-                printf("VPN\n");
+                fprintf(fp, "VPN\n");
                 break;
             case NM_CON_WIFI:
-                printf("WIFI\n");
+                fprintf(fp, "WIFI\n");
                 break;
             case NM_CON_OTHER:
-                printf("OTHER\n");
+                fprintf(fp, "OTHER\n");
                 break;
             case NM_CON_DELIMITER:
-                printf("DEL\n");
+                fprintf(fp, "DEL\n");
                 break;
             case NM_CON_IGNORE:
-                printf("IGNORE\n");
+                fprintf(fp, "IGNORE\n");
                 break;
             default:
-                printf("Unknown type\n");
+                fprintf(fp, "Unknown type\n");
         }
-        printf("zones: ");
-        string_list_dbg_print(&iter->self->zones);
-        printf("\n");
-        printf("servers: ");
-        string_list_dbg_print(&iter->self->servers);
-        printf("\n");
+        fprintf(fp, "zones: ");
+        string_list_dbg_print_inner(&iter->self->zones, fp);
+        fprintf(fp, "\n");
+        fprintf(fp, "servers: ");
+        string_list_dbg_print_inner(&iter->self->servers, fp);
+        fprintf(fp, "\n");
 
-        printf("--------------------------------------\n");
+        fprintf(fp, "--------------------------------------\n");
         ++n;
         iter = iter->next;
     }
+}
+
+void nm_connection_list_dbg_print(struct nm_connection_list *list)
+{
+    nm_connection_list_dbg_print_inner(list, stdout);
+}
+
+void nm_connection_list_dbg_eprint(struct nm_connection_list *list)
+{
+    nm_connection_list_dbg_print_inner(list, stderr);
 }
 
 struct string_buffer nm_connection_list_sprint_servers(struct nm_connection_list *list)

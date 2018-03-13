@@ -844,10 +844,56 @@ static void update_global_forwarders(struct nm_connection_list *original) {
     nm_connection_list_clear(&defaults);
 }
 
+static const struct string_buffer rfc1918_reverse_zones[] = {
+	{.string = "c.f.ip6.arpa", .length = 12},
+	{.string = "d.f.ip6.arpa", .length = 12},
+	{.string = "168.192.in-addr.arpa", .length = 20},
+	{.string = "16.172.in-addr.arpa", .length = 19},
+	{.string = "17.172.in-addr.arpa", .length = 19},
+	{.string = "18.172.in-addr.arpa", .length = 19},
+	{.string = "19.172.in-addr.arpa", .length = 19},
+	{.string = "20.172.in-addr.arpa", .length = 19},
+	{.string = "21.172.in-addr.arpa", .length = 19},
+	{.string = "22.172.in-addr.arpa", .length = 19},
+	{.string = "23.172.in-addr.arpa", .length = 19},
+	{.string = "24.172.in-addr.arpa", .length = 19},
+	{.string = "25.172.in-addr.arpa", .length = 19},
+	{.string = "26.172.in-addr.arpa", .length = 19},
+	{.string = "27.172.in-addr.arpa", .length = 19},
+	{.string = "28.172.in-addr.arpa", .length = 19},
+	{.string = "29.172.in-addr.arpa", .length = 19},
+	{.string = "30.172.in-addr.arpa", .length = 19},
+	{.string = "31.172.in-addr.arpa", .length = 19},
+	{.string = "10.in-addr.arpa", .length = 15},
+};
+static const size_t reverse_zones_len = 20;
+
+static bool zone_in_reverse_zones(char *zone, size_t len) {
+	for (size_t i = 0; i < reverse_zones_len; ++i) {
+		if (len == rfc1918_reverse_zones[i].length) {
+			return true;
+		}
+		if (strncmp(rfc1918_reverse_zones[i].string, zone, len) == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
 static void update_connection_zones(struct nm_connection_list *connections) {
+	
 	struct store stored_zones = STORE_INIT("zones");
 	FOR_EACH_STRING_IN_LIST(iter, &stored_zones.cache) {
-		
+		if (nm_connection_list_contains_zone(connections, iter->string, iter->length)) {
+			continue;
+		}
+		if (zone_in_reverse_zones(iter->string, iter->length)) {
+			if (global_svr->cfg->use_private_address_ranges) {
+				continue;
+			} else {
+				// TODO
+			}
+		}
 	}
 	return;
 }

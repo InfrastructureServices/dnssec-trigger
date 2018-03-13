@@ -11,6 +11,7 @@
 #include "../riggerd/store.h"
 #include "../riggerd/string_buffer.h"
 #include "../riggerd/string_list.h"
+#include "../riggerd/ubhook.h"
 
 static void string_list_test_remove_at_the_beginning(void **state) {
     struct string_list test;
@@ -131,6 +132,16 @@ static void store_commit_cache(void **state) {
     (void) state; /* unused */
 }
 
+static void ubhook_list_forwards_test(void **state) {
+    FILE *fp;
+	fp = fopen("test/list_forwards_example", "r");
+	struct nm_connection_list ret = hook_unbound_list_forwards_inner(NULL, fp);
+    nm_connection_list_dbg_eprint(&ret);
+    nm_connection_list_clear(&ret);
+	fclose(fp);    
+    (void) state; /* unused */
+}
+
 int main() {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(string_list_test_remove_at_the_beginning),
@@ -141,7 +152,8 @@ int main() {
         cmocka_unit_test(lock_file_check_file_permissions),
         cmocka_unit_test(store_macro_creation),
         cmocka_unit_test(store_read_file_content),
-        cmocka_unit_test(store_commit_cache)
+        cmocka_unit_test(store_commit_cache),
+        cmocka_unit_test(ubhook_list_forwards_test)
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
