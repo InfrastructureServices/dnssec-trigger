@@ -94,8 +94,8 @@ bool string_list_is_equal(const struct string_list* l1, const struct string_list
  * @param list: List to be printed
  */
 void string_list_dbg_print(const struct string_list* list);
-
 void string_list_dbg_eprint(const struct string_list* list);
+void string_list_dbg_print_inner(const struct string_list* list, FILE *fp);
 
 /**
  * Print list into a buffer. Be careful, you have to free the buffer

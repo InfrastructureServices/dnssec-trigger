@@ -118,7 +118,7 @@ void nm_connection_list_push_back(struct nm_connection_list *list, struct nm_con
  * @param zone: Zone name
  * @param len: Zone name length
  */
-bool nm_connection_list_contains_zone(struct nm_connection_list *list, char *zone, size_t len);
+bool nm_connection_list_contains_zone(const struct nm_connection_list *list, char *zone, size_t len);
 
 /**
  * Filter connections list and return a new non-owning one, which contains only those connections

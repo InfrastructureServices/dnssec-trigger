@@ -71,8 +71,12 @@ void nm_connection_list_push_back(struct nm_connection_list *list, struct nm_con
     // new_value is now owned by connection list => it will be freed with the list
 }
 
-bool nm_connection_list_contains_zone(struct nm_connection_list *list, char *zone, size_t len) {
-    // TODO: implement
+bool nm_connection_list_contains_zone(const struct nm_connection_list *list, char *zone, size_t len) {
+    for (struct nm_connection_node *iter = list->first; NULL != iter; iter = iter->next) {
+        if (string_list_contains(&(iter->self->zones), zone, len)) {
+            return true;
+        }
+    }
     return false;
 }
 
