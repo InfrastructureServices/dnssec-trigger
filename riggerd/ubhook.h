@@ -125,6 +125,16 @@ struct nm_connection_list hook_unbound_list_forwards(struct cfg* cfg);
  */
 struct nm_connection_list hook_unbound_list_forwards_inner(struct cfg* cfg, FILE *fp);
 
+/**
+ * 
+ */
+struct string_list hook_unbound_list_local_zones(struct cfg* cfg);
+
+/**
+ * For testing purposes only.
+ */
+struct string_list hook_unbound_list_local_zones_inner(struct cfg* cfg, FILE *fp);
+
 #endif
 
 #endif /* UBHOOKS_H */

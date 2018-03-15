@@ -369,4 +369,19 @@ struct nm_connection_list hook_unbound_list_forwards_inner(struct cfg* cfg, FILE
 	return ret;
 }
 
+struct string_list hook_unbound_list_local_zones(struct cfg* cfg) {
+	FILE *fp;
+	fp = popen("unbound-control list_local_zones", "r");
+	struct string_list ret = hook_unbound_list_local_zones_inner(cfg, fp);
+	fclose(fp);
+	return ret;
+}
+
+struct string_list hook_unbound_list_local_zones_inner(struct cfg* cfg, FILE *fp) {
+	struct string_list ret;
+	string_list_init(&ret);
+	return ret;
+}
+
+
 #endif
