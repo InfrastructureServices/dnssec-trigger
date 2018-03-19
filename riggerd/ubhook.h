@@ -116,7 +116,7 @@ void hook_unbound_ssl_upstream(struct cfg* cfg, int ssl443_ip4, int ssl443_ip6);
 #ifdef FWD_ZONES_SUPPORT
 
 /**
- * 
+ * Run unbound list_forwards and parse output into the return structure
  */
 struct nm_connection_list hook_unbound_list_forwards(struct cfg* cfg);
 
@@ -126,7 +126,7 @@ struct nm_connection_list hook_unbound_list_forwards(struct cfg* cfg);
 struct nm_connection_list hook_unbound_list_forwards_inner(struct cfg* cfg, FILE *fp);
 
 /**
- * 
+ * Run unbound list_local_zones and parse output into the return structure
  */
 struct string_list hook_unbound_list_local_zones(struct cfg* cfg);
 
@@ -134,6 +134,12 @@ struct string_list hook_unbound_list_local_zones(struct cfg* cfg);
  * For testing purposes only.
  */
 struct string_list hook_unbound_list_local_zones_inner(struct cfg* cfg, FILE *fp);
+
+/**
+ * Call unbound-control local_zone <zone> <type>
+ */
+int hook_unbound_add_local_zone(struct string_buffer zone, struct string_buffer type);
+int hook_unbound_add_local_zone_inner(struct string_buffer exe, struct string_buffer zone, struct string_buffer type);
 
 #endif
 
