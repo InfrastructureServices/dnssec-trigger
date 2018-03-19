@@ -149,13 +149,17 @@ static void ubhook_list_forwards_test(void **state) {
 static void ubhook_list_local_zones_test(void **state) {
     FILE *fp;
 	fp = fopen("test/list_local_zones_example", "r");
+    if (!fp)
+        assert_false(true);
+
 	struct string_list ret = hook_unbound_list_local_zones_inner(NULL, fp);
-    //nm_connection_list_dbg_eprint(&ret);
+    //string_list_dbg_eprint(&ret);
     struct string_buffer zone = string_builder("test.");
     struct string_buffer zone2 = string_builder("invalid.");
     assert_true(string_list_contains(&ret, zone.string, zone.length));
     assert_true(string_list_contains(&ret, zone2.string, zone2.length));
     string_list_clear(&ret);
+
 	fclose(fp);    
     (void) state; /* unused */
 }

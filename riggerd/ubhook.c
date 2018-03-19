@@ -380,6 +380,18 @@ struct string_list hook_unbound_list_local_zones(struct cfg* cfg) {
 struct string_list hook_unbound_list_local_zones_inner(struct cfg* cfg, FILE *fp) {
 	struct string_list ret;
 	string_list_init(&ret);
+	char zone[1024], label[1024];
+    int r = 0;
+
+	while ((r = fscanf(fp, "%s %s\n", zone, label)) > 0 ) {
+        struct string_buffer label_static = string_builder("static");
+        if (strncmp(label_static.string, label, label_static.length) != 0) {
+            // TODO: log it? do sth about it?
+        } else {
+			string_list_push_back(&ret, zone, strlen(zone));
+		}
+    }
+
 	return ret;
 }
 
