@@ -64,3 +64,7 @@ void store_destroy(struct store *self) {
 void store_remove(struct store *self, char *string, size_t len) {
     string_list_remove(&self->cache, string, len);
 }
+
+bool store_contains(struct store *self, char *string, size_t len) {
+    return string_list_contains(&(self->cache), string, len);
+}

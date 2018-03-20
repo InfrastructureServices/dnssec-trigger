@@ -905,6 +905,22 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 		}
 		store_remove(&stored_zones, iter->string, iter->length);
 	}
+
+	for (struct nm_connection_node *iter = connections->first; NULL != iter; iter = iter->next) {
+		struct nm_connection *c = iter->self;
+		struct string_buffer zone = {
+			.string = c->zones.first->string,
+			.length = c->zones.first->length,
+		};
+		if ( (store_contains(&stored_zones, zone.string, zone.length)) || !(nm_connection_list_contains_zone(&forward_zones, zone.string, zone.length)) ) {
+			;;;;;;;;;;
+			/*
+			unbound_zones.add(zone, connections[zone].servers, secure=config.validate_connection_provided_zones)
+            stored_zones.add(zone)
+			*/
+		}
+	}
+
 	return;
 }
 
