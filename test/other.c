@@ -202,6 +202,25 @@ static void nm_list_remove(void **state) {
     (void) state; /* unused */
 }
 
+static void string_list_extension(void **state) {
+    struct string_list new;
+
+    /* You need to run this test with address sanitizer, otherwise it does nothing */
+
+    string_list_init(&new);
+    string_list_push_back(&new, "aaa", 3);
+    new.first->extension = malloc(666);
+    string_list_remove(&new, "aaa", 3);
+    string_list_clear(&new);
+
+    string_list_init(&new);
+    string_list_push_back(&new, "aaa", 3);
+    new.first->extension = malloc(666);
+    string_list_clear(&new);
+
+    (void) state; /* unused */
+}
+
 int main() {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(string_list_test_remove_at_the_beginning),
@@ -217,7 +236,8 @@ int main() {
         cmocka_unit_test(ubhook_list_local_zones_test),
         cmocka_unit_test(ubhook_add_local_zone),
         cmocka_unit_test(ubhook_remove_local_zone),
-        cmocka_unit_test(nm_list_remove)
+        cmocka_unit_test(nm_list_remove),
+        cmocka_unit_test(string_list_extension)
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

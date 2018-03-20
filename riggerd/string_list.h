@@ -29,6 +29,10 @@ struct string_entry {
 	char* string;
 	/** Length of the string buffer */
 	size_t length;
+	/** Heap allocated extension of this entry. It can be of any type and if not NULL
+	 * it will be freed during the cleanup.
+	 */
+	void* extension;
 };
 
 // TODO: move somewhere else

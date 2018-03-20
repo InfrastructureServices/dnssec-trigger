@@ -38,6 +38,9 @@ void string_list_clear(struct string_list* list)
 		struct string_entry* node = iter;
 		iter = node->next;
 		free(node->string);
+		if (NULL != node->extension) {
+			free(node->extension);
+		}
 		free(node);
 	}
 	list->first = NULL;
@@ -68,6 +71,7 @@ void string_list_push_back(struct string_list* list, const char* new_value, cons
 	}
 
 	*node = (struct string_entry*) calloc_or_die(sizeof(struct string_entry));
+	(*node)->extension = NULL;
 	(*node)->length = len;
 	(*node)->string = (char*) calloc_or_die(len+1);
 	strncpy((*node)->string, new_value, len);
@@ -121,6 +125,9 @@ void string_list_remove(struct string_list* list, const char* value, const size_
 				prev->next = iter->next;
 			}
 			free(iter->string);
+			if (NULL != iter->extension) {
+				free(iter->extension);
+			}
 			free(iter);
 			return;
 		}
