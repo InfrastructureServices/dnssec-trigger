@@ -31,6 +31,18 @@ void nm_connection_list_init_non_owning(struct nm_connection_list *list)
     list->ownership = LIST_NON_OWNING;
 }
 
+static void nm_connection_clean_up_node(struct nm_connection_node *current, enum list_ownership_type ownership) {
+    if (LIST_OWNING == ownership){
+            // We own the whole structure, clean up everything!
+            nm_connection_clear(current->self);
+            free(current->self);
+            free(current);
+        } else {
+            // We own only nodes, not its content
+            free(current);
+        }
+}
+
 void nm_connection_list_clear(struct nm_connection_list *list)
 {
     if (NULL == list)
@@ -41,15 +53,7 @@ void nm_connection_list_clear(struct nm_connection_list *list)
     while (NULL != current){
         next = current->next;
 
-        if (LIST_OWNING == list->ownership){
-            // We own the whole structure, clean up everything!
-            nm_connection_clear(current->self);
-            free(current->self);
-            free(current);
-        } else {
-            // We own only nodes, not its content
-            free(current);
-        }
+        nm_connection_clean_up_node(current, list->ownership);
 
         current = next;
     }
@@ -78,6 +82,18 @@ bool nm_connection_list_contains_zone(const struct nm_connection_list *list, cha
         }
     }
     return false;
+}
+
+int nm_connection_list_remove(struct nm_connection_list *list, char *zone, size_t len) {
+    struct nm_connection_node **prev = &(list->first);
+    for (struct nm_connection_node *iter = list->first; NULL != iter; prev = &(iter->next), iter = iter->next) {
+        if (string_list_contains(&(iter->self->zones), zone, len)) {
+            *prev = iter->next;
+            nm_connection_clean_up_node(iter, list->ownership);
+            return 0;
+        }
+    }
+    return -1;
 }
 
 struct nm_connection_list nm_connection_list_filter(struct nm_connection_list *list,

@@ -42,6 +42,11 @@ int store_commit(const struct store *self);
  */
 void store_destroy(struct store *self);
 
+/*
+ * Remove a string from the cache
+ */
+void store_remove(struct store *self, char *string, size_t len);
+
 /**
  * Macro that wraps up the init function in order to reduce typing.
  */

@@ -181,6 +181,27 @@ static void ubhook_remove_local_zone(void **state) {
     (void) state; /* unused */
 }
 
+static void nm_list_remove(void **state) {
+    FILE *fp;
+	fp = fopen("test/list_forwards_example", "r");
+	struct nm_connection_list ret = hook_unbound_list_forwards_inner(NULL, fp);
+    //nm_connection_list_dbg_eprint(&ret);
+    struct string_buffer zone = string_builder("ny.mylovelycorporate.io.");
+    struct string_buffer zone2 = string_builder(".");
+    
+    assert_true(nm_connection_list_contains_zone(&ret, zone.string, zone.length));
+    nm_connection_list_remove(&ret, zone.string, zone.length);
+    assert_false(nm_connection_list_contains_zone(&ret, zone.string, zone.length));
+
+    assert_true(nm_connection_list_contains_zone(&ret, zone2.string, zone2.length));
+    nm_connection_list_remove(&ret, zone2.string, zone2.length);
+    assert_false(nm_connection_list_contains_zone(&ret, zone2.string, zone2.length));
+
+    nm_connection_list_clear(&ret);
+	fclose(fp);  
+    (void) state; /* unused */
+}
+
 int main() {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(string_list_test_remove_at_the_beginning),
@@ -195,7 +216,8 @@ int main() {
         cmocka_unit_test(ubhook_list_forwards_test),
         cmocka_unit_test(ubhook_list_local_zones_test),
         cmocka_unit_test(ubhook_add_local_zone),
-        cmocka_unit_test(ubhook_remove_local_zone)
+        cmocka_unit_test(ubhook_remove_local_zone),
+        cmocka_unit_test(nm_list_remove)
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

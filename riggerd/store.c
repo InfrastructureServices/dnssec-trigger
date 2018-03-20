@@ -60,3 +60,7 @@ int store_commit(const struct store *self) {
 void store_destroy(struct store *self) {
     string_list_clear(&self->cache);
 }
+
+void store_remove(struct store *self, char *string, size_t len) {
+    string_list_remove(&self->cache, string, len);
+}

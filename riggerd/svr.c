@@ -55,6 +55,7 @@
 #include "fwd_zones.h"
 #include "lock.h"
 #include "store.h"
+#include "ubhook.h"
 #endif
 
 struct svr* global_svr = NULL;
@@ -881,8 +882,9 @@ static bool zone_in_reverse_zones(char *zone, size_t len) {
 }
 
 static void update_connection_zones(struct nm_connection_list *connections) {
-	
+	struct string_buffer static_label = string_builder("static");
 	struct store stored_zones = STORE_INIT("zones");
+	struct nm_connection_list forward_zones =  hook_unbound_list_forwards(NULL);
 	FOR_EACH_STRING_IN_LIST(iter, &stored_zones.cache) {
 		if (nm_connection_list_contains_zone(connections, iter->string, iter->length)) {
 			continue;
@@ -891,9 +893,17 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 			if (global_svr->cfg->use_private_address_ranges) {
 				continue;
 			} else {
-				// TODO
+				struct string_buffer zone = {
+					.string = iter->string,
+					.length = iter->length
+				};
+				hook_unbound_add_local_zone(zone, static_label);
 			}
 		}
+		if (nm_connection_list_contains_zone(&forward_zones, iter->string, iter->length)) {
+			nm_connection_list_remove(&forward_zones, iter->string, iter->length);
+		}
+		store_remove(&stored_zones, iter->string, iter->length);
 	}
 	return;
 }

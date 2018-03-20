@@ -121,6 +121,14 @@ void nm_connection_list_push_back(struct nm_connection_list *list, struct nm_con
 bool nm_connection_list_contains_zone(const struct nm_connection_list *list, char *zone, size_t len);
 
 /**
+ * Remove the first connection with given zone
+ * @param list: List to search through
+ * @param zone: Zone name
+ * @param len: Zone name length
+ */
+int nm_connection_list_remove(struct nm_connection_list *list, char *zone, size_t len);
+
+/**
  * Filter connections list and return a new non-owning one, which contains only those connections
  * that satisfy **all** filters.
  * @param list: Original list (will be a superset to the new one)
