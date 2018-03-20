@@ -173,6 +173,14 @@ static void ubhook_add_local_zone(void **state) {
     (void) state; /* unused */
 }
 
+static void ubhook_remove_local_zone(void **state) {
+    struct string_buffer exe = string_builder("./test/unbound-control-fake.sh");
+    struct string_buffer zone = string_builder("test");
+    int ret = hook_unbound_remove_local_zone_inner(exe, zone);
+    assert_int_equal(ret, 0);
+    (void) state; /* unused */
+}
+
 int main() {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(string_list_test_remove_at_the_beginning),
@@ -186,7 +194,8 @@ int main() {
         cmocka_unit_test(store_commit_cache),
         cmocka_unit_test(ubhook_list_forwards_test),
         cmocka_unit_test(ubhook_list_local_zones_test),
-        cmocka_unit_test(ubhook_add_local_zone)
+        cmocka_unit_test(ubhook_add_local_zone),
+        cmocka_unit_test(ubhook_remove_local_zone)
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

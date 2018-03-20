@@ -413,4 +413,22 @@ int hook_unbound_add_local_zone_inner(struct string_buffer exe, struct string_bu
 	return ret;
 }
 
+int hook_unbound_remove_local_zone(struct string_buffer zone) {
+	struct string_buffer exe = string_builder("unbound-control");
+	return hook_unbound_remove_local_zone_inner(exe, zone);
+}
+
+int hook_unbound_remove_local_zone_inner(struct string_buffer exe, struct string_buffer zone) {
+	FILE *fp;
+	int ret = -1;
+	char cmd[1000] = {'\0'};
+	sprintf(cmd, "%s local_zone_remove %s", exe.string, zone.string);
+	fp = popen(cmd, "r");
+	if (fscanf(fp, "ok\n") != -1) {
+		ret = 0;
+	}
+	fclose(fp);
+	return ret;
+}
+
 #endif

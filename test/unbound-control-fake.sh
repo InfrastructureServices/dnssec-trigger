@@ -8,6 +8,14 @@ then
 	else
 		echo fail
 	fi
+elif [ $# -eq 2 ]
+then
+	if [ $1 = "local_zone_remove" ] && [ $2 = "test" ]
+	then
+		echo ok
+	else
+		echo fail
+	fi
 else
 	echo fail
 fi

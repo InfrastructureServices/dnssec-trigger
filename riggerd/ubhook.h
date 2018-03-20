@@ -141,6 +141,14 @@ struct string_list hook_unbound_list_local_zones_inner(struct cfg* cfg, FILE *fp
 int hook_unbound_add_local_zone(struct string_buffer zone, struct string_buffer type);
 int hook_unbound_add_local_zone_inner(struct string_buffer exe, struct string_buffer zone, struct string_buffer type);
 
+
+/**
+ * Call unbound-control local_zone_remove <zone> <type>
+ */
+int hook_unbound_remove_local_zone(struct string_buffer zone);
+int hook_unbound_remove_local_zone_inner(struct string_buffer exe, struct string_buffer zone);
+
+
 #endif
 
 #endif /* UBHOOKS_H */
