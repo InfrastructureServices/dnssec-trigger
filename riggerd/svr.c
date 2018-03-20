@@ -913,12 +913,8 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 			.length = c->zones.first->length,
 		};
 		if ( (store_contains(&stored_zones, zone.string, zone.length)) || !(nm_connection_list_contains_zone(&forward_zones, zone.string, zone.length)) ) {
-			;;;;;;;;;;
-			/*
-			unbound_zones.add(zone, connections[zone].servers, secure=config.validate_connection_provided_zones)
-            stored_zones.add(zone)
-			*/
 			nm_connection_list_copy_and_push_back(&forward_zones, iter->self);
+			store_add(&stored_zones, zone.string, zone.length);
 		}
 	}
 
