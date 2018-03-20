@@ -71,6 +71,12 @@ void string_list_push_back(struct string_list* list, const char* new_value, cons
  */
 bool string_list_contains(const struct string_list* list, const char* value, const size_t buffer_size);
 
+/**
+ * Diplicate the list
+ * @param original: List to copy
+ * @param copy: New list
+ */
+void string_list_diplicate(const struct string_list* original, struct string_list *copy);
 
 /**
  * Find out whether the list contains the given value and remove it

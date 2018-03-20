@@ -113,6 +113,14 @@ void nm_connection_list_clear(struct nm_connection_list *list);
 void nm_connection_list_push_back(struct nm_connection_list *list, struct nm_connection *new_value);
 
 /**
+ * Copy the new_value and then push it back
+ * @param list: List to push to
+ * @param new_value: New connection
+ */
+void nm_connection_list_copy_and_push_back(struct nm_connection_list *list, struct nm_connection *new_value);
+
+
+/**
  * Search for a zone with given name and return if it is present or not
  * @param list: List to search through
  * @param zone: Zone name

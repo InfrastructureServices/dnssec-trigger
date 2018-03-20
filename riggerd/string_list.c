@@ -100,6 +100,19 @@ bool string_list_contains(const struct string_list* list, const char* value, con
 	return false;
 }
 
+void string_list_diplicate(const struct string_list* original, struct string_list *copy) {
+	if (NULL == original || NULL == copy) {
+		return;
+	}
+
+	string_list_clear(copy);
+	string_list_init(copy);
+
+	FOR_EACH_STRING_IN_LIST(iter, original) {
+		string_list_push_back(copy, iter->string, iter->length);
+	}
+}
+
 void string_list_remove(struct string_list* list, const char* value, const size_t buffer_size) {
 	if (NULL == list || NULL == value || buffer_size == 0) {
 		return;

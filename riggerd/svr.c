@@ -918,6 +918,7 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 			unbound_zones.add(zone, connections[zone].servers, secure=config.validate_connection_provided_zones)
             stored_zones.add(zone)
 			*/
+			nm_connection_list_copy_and_push_back(&forward_zones, iter->self);
 		}
 	}
 
