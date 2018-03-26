@@ -105,6 +105,7 @@ dnssec-trigger.8
 dnssec-triggerd
 dnssec-triggerd.service
 example.conf
+!dnssec-trigger.tmpfiles.d
 
 
 test/other-test
