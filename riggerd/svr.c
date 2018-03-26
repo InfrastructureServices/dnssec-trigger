@@ -918,6 +918,52 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 		}
 	}
 
+	/*
+			# Configure forward zones for reverse name resolution of private addresses.
+            # RFC1918 zones will be installed, except those already provided by connections
+            # and those installed by other means than by dnssec-trigger-script.
+            # RFC19118 zones will be removed if there are no global forwarders.
+	 */
+	if (global_svr->cfg->use_private_address_ranges) {
+		struct nm_connection_list global_forwarders;
+		if (global_svr->cfg->use_vpn_forwarders) {
+			global_forwarders = nm_connection_list_filter(connections, 1, &nm_connection_filter_type_vpn);
+		} else {
+			global_forwarders = nm_connection_list_filter(connections, 1, &nm_connection_filter_default);
+		}
+
+		for (size_t i=0; i<reverse_zones_len; ++i) {
+			const struct string_buffer *zone = &rfc1918_reverse_zones[i];
+			/*
+					# Ignore a connection provided zone as it's been already
+                    # processed.
+			*/
+			if (nm_connection_list_contains_zone(&forward_zones, zone->string, zone->length)) {
+				continue;
+			}
+			if (store_contains(&stored_zones, zone->string, zone->length) || 
+			    !nm_connection_list_contains_zone(&forward_zones, zone->string, zone->length)) {
+					struct nm_connection *new_zone = (struct nm_connection *) calloc_or_die(sizeof(struct nm_connection));
+					nm_connection_init(new_zone);
+					new_zone->servers = nm_connection_list_get_servers_list(&global_forwarders);
+					new_zone->security = NM_CON_INSECURE;
+					nm_connection_list_push_back(&forward_zones, new_zone);
+					store_add(&stored_zones, zone->string, zone->length);
+					hook_unbound_remove_local_zone(*zone);
+			} else {
+				if (nm_connection_list_contains_zone(&forward_zones, zone->string, zone->length)) {
+					hook_unbound_remove_local_zone(*zone);
+				}
+				if (store_contains(&stored_zones, zone->string, zone->length)) {
+					store_remove(&stored_zones, zone->string, zone->length);
+				}
+				hook_unbound_add_local_zone(*zone, static_label);
+			}
+		}
+	}
+
+	store_commit(&stored_zones);
+
 	return;
 }
 
