@@ -11,6 +11,7 @@ void nm_connection_init(struct nm_connection *conn)
     string_list_init(&conn->zones);
     conn->type = NM_CON_IGNORE;
     string_list_init(&conn->servers);
+    conn->security = NM_CON_NA;
 }
 
 void nm_connection_clear(struct nm_connection *conn)
@@ -108,6 +109,17 @@ int nm_connection_list_remove(struct nm_connection_list *list, char *zone, size_
         }
     }
     return -1;
+}
+
+struct string_list nm_connection_list_get_servers_list(struct nm_connection_list *list) {
+    struct string_list ret;
+    string_list_init(&ret);
+
+    for (struct nm_connection_node *iter = list->first; NULL != iter; iter = iter->next) {
+        string_list_copy_and_append(&ret, &iter->self->servers);
+    }
+
+    return ret;
 }
 
 struct nm_connection_list nm_connection_list_filter(struct nm_connection_list *list,

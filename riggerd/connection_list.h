@@ -21,6 +21,12 @@ enum nm_connection_type {
     NM_CON_DELIMITER // XXX: What is this??
 };
 
+enum nm_connection_security {
+    NM_CON_SECURE,
+    NM_CON_INSECURE,
+    NM_CON_NA, // <- Not applicable
+};
+
 /**
  *
  */
@@ -42,6 +48,8 @@ struct nm_connection {
     enum nm_connection_type type;
     /** Linked list of servers */
     struct string_list servers;
+    /** Marker of secure/insecure connections */
+    enum nm_connection_security security;
 };
 
 /**
@@ -135,6 +143,12 @@ bool nm_connection_list_contains_zone(const struct nm_connection_list *list, cha
  * @param len: Zone name length
  */
 int nm_connection_list_remove(struct nm_connection_list *list, char *zone, size_t len);
+
+/**
+ * 
+ * @param list: List to search through
+ */
+struct string_list nm_connection_list_get_servers_list(struct nm_connection_list *list);
 
 /**
  * Filter connections list and return a new non-owning one, which contains only those connections
