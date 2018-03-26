@@ -79,6 +79,13 @@ bool string_list_contains(const struct string_list* list, const char* value, con
 void string_list_diplicate(const struct string_list* original, struct string_list *copy);
 
 /**
+ * Copy the second list and append it to the first one
+ * @param original: The list that gets extended
+ * @param append: The list that is copied
+ */
+void string_list_copy_and_append(struct string_list* original, struct string_list *append);
+
+/**
  * Find out whether the list contains the given value and remove it
  * @param list: List to check
  * @param new_value: String to be removed

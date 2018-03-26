@@ -113,6 +113,15 @@ void string_list_diplicate(const struct string_list* original, struct string_lis
 	}
 }
 
+void string_list_copy_and_append(struct string_list* original, struct string_list *append) {
+	if (NULL == original || NULL == append) {
+		return;
+	}
+	FOR_EACH_STRING_IN_LIST(iter, append) {
+		string_list_push_back(original, iter->string, iter->length);
+	}
+}
+
 void string_list_remove(struct string_list* list, const char* value, const size_t buffer_size) {
 	if (NULL == list || NULL == value || buffer_size == 0) {
 		return;
