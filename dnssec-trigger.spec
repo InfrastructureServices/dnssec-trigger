@@ -50,6 +50,8 @@ some user input is needed, the panel creates a dialog window.
 
 %prep
 %setup -q %{?svn_snapshot:-n %{name}-%{version}_%{svn_snapshot}}
+rm -rf build/
+rm -rf .git/
 
 # don't use DNSSEC for forward zones for now
 # sed -i "s/validate_connection_provided_zones=yes/validate_connection_provided_zones=no/" dnssec.conf
