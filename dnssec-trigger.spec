@@ -98,11 +98,6 @@ ln -s %{_mandir}/man8/dnssec-trigger.8 %{buildroot}/%{_mandir}/man8/dnssec-trigg
 
 %preun
 %systemd_preun %{name}d.service
-# Package removal, not upgrade
-if [ "$1" -eq "0" ] ; then
-    # dnssec-triggerd makes /etc/resolv.conf immutable, undo that on removal
-    chattr -i %{_sysconfdir}/resolv.conf
-fi
 
 %postun
 %systemd_postun_with_restart %{name}d.service
@@ -124,9 +119,6 @@ if [ ! -e %{_sysconfdir}/%{name}/dnssec-trigger.conf ]; then
         esac
 fi
 
-
-%clean
-rm -rf ${RPM_BUILD_ROOT}
 
 
 %files
