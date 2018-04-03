@@ -1,21 +1,46 @@
 %global _hardened_build 1
 
-%global svn_snapshot 20161026
+#%%global svn_snapshot 20150714
 
 Summary: Tool for dynamic reconfiguration of validating resolver Unbound
 Name: dnssec-trigger
-Version: 0.13
-Release: 0.4%{?svn_snapshot:.%{svn_snapshot}svn}%{?dist}
+Version: 0.15
+Release: 5%{?svn_snapshot:.%{svn_snapshot}svn}%{?dist}
 License: BSD
 Url: http://www.nlnetlabs.nl/downloads/dnssec-trigger/
-Source0: %{name}-%{version}_%{svn_snapshot}.tar.gz
 
+%if 0%{?svn_snapshot:1}
+# generated using './makedist.sh -s' in the cloned upstream trunk
+Source0: %{name}-%{version}_%{svn_snapshot}.tar.gz
+%else
+Source0: http://www.nlnetlabs.nl/downloads/dnssec-trigger/%{name}-%{version}.tar.gz
+%endif
+Source1: dnssec-trigger.tmpfiles.d
+Source2: dnssec-trigger-default.conf
+Source3: dnssec-trigger-workstation.conf
+
+# to obsolete the version in which the panel was in main package
+Obsoletes: %{name} < 0.12-22
+Suggests: %{name}-panel
 # Require a version of NetworkManager that doesn't forget to issue dhcp-change
 # https://bugzilla.redhat.com/show_bug.cgi?id=1112248
+%if 0%{?rhel} >= 7
+Requires: NetworkManager >= 0.9.9.1-13
+%else
+%if 0%{?fedora} >= 21
 Requires: NetworkManager >= 0.9.9.95-1
-Requires: ldns >= 1.6.10, NetworkManager-glib, unbound
-BuildRequires: openssl-devel, ldns-devel, python3-devel
-BuildRequires: NetworkManager-devel
+%else
+Requires: NetworkManager >= 0.9.9.0-40
+%endif
+%endif
+Requires: ldns >= 1.6.10, NetworkManager-libnm, unbound
+# needed by /usr/sbin/dnssec-trigger-control-setup
+# otherwise it ends with error: /usr/sbin/dnssec-trigger-control-setup: line 180: openssl: command not found
+Requires: openssl
+# needed for /usr/bin/chattr
+Requires: e2fsprogs
+BuildRequires: openssl-devel, ldns-devel, python3-devel, gcc
+BuildRequires: NetworkManager-libnm-devel
 
 BuildRequires: systemd
 Requires(post): systemd
@@ -54,7 +79,8 @@ rm -rf build/
 rm -rf .git/
 
 # don't use DNSSEC for forward zones for now
-# sed -i "s/validate_connection_provided_zones=yes/validate_connection_provided_zones=no/" dnssec.conf
+sed -i "s/validate_connection_provided_zones=yes/validate_connection_provided_zones=no/" dnssec.conf
+
 
 %build
 %configure  \
@@ -66,12 +92,14 @@ rm -rf .git/
 
 %{__make} %{?_smp_mflags}
 
+
 %install
+rm -rf %{buildroot}
 %{__make} DESTDIR=%{buildroot} install
 
 install -d 0755 %{buildroot}%{_unitdir}
-install -m 0644 dnssec-trigger-default.conf %{buildroot}%{_sysconfdir}/%{name}/
-install -m 0644 dnssec-trigger-workstation.conf %{buildroot}%{_sysconfdir}/%{name}/
+install -m 0644 %{SOURCE2} %{buildroot}%{_sysconfdir}/%{name}/
+install -m 0644 %{SOURCE3} %{buildroot}%{_sysconfdir}/%{name}/
 
 mkdir -p %{buildroot}%{_libexecdir}
 
@@ -79,7 +107,7 @@ desktop-file-install --dir=%{buildroot}%{_datadir}/applications dnssec-trigger-p
 
 # install the configuration for /var/run/dnssec-trigger into tmpfiles.d dir
 mkdir -p %{buildroot}%{_tmpfilesdir}
-install -m 644 dnssec-trigger.tmpfiles.d ${RPM_BUILD_ROOT}%{_tmpfilesdir}/%{name}.conf
+install -m 644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_tmpfilesdir}/%{name}.conf
 # we must create the /var/run/dnssec-trigger directory
 mkdir -p %{buildroot}%{_localstatedir}/run
 install -d -m 0755 %{buildroot}%{_localstatedir}/run/%{name}
@@ -150,6 +178,48 @@ fi
 
 
 %changelog
+* Wed Mar 14 2018 Petr Menšík <pemensik@redhat.com> - 0.15-5
+- Accept NXDOMAIN for NSEC probe (#1555355)
+
+* Mon Feb 19 2018 Tomas Hozza <thozza@redhat.com> - 0.15-4
+- Added explicit BuildRequires on gcc as required by packaging guidelines
+- Added explicit Requires on e2fsprogs, so that /usr/bin/chattr is available
+- Remove redundant removal of immutable bit in %%preun scriptlet (#1542400)
+
+* Mon Feb 19 2018 Tomas Hozza <thozza@redhat.com> - 0.15-3
+- use NetworkManager-libnm instead of NetworkManager-glib
+
+* Wed Feb 07 2018 Fedora Release Engineering <releng@fedoraproject.org> - 0.15-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
+
+* Mon Dec 11 2017 Tomas Hozza <thozza@redhat.com> - 0.15-1
+- Update to stable 0.15 upstream release
+
+* Fri Aug 18 2017 Petr Menšík <pemensik@redhat.com> - 0.13-6
+- Skip always failing kr.com, update root IPs (#1482939)
+
+* Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.13-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
+
+* Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.13-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
+* Wed Mar 08 2017 Tomas Hozza <thozza@redhat.com> - 0.13-3
+- Rebuild against new ldns
+
+* Wed Mar 01 2017 Tomas Hozza <thozza@redhat.com> - 0.13-2
+- Include fix for runtime issues with OpenSSL 1.1.0 (#1427561)
+
+* Fri Feb 17 2017 Tomas Hozza <thozza@redhat.com> - 0.13-1
+- Update to stable 0.13 upstream release
+- Dropped merged patches
+
+* Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 0.13-0.6.20150714svn
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
+* Mon Dec 19 2016 Miro Hrončok <mhroncok@redhat.com> - 0.13-0.5.20150714svn
+- Rebuild for Python 3.6
+
 * Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 0.13-0.4.20150714svn
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 
