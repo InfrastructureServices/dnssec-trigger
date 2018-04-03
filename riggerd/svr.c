@@ -801,12 +801,17 @@ static void handle_submit(char* ips)
 }
 
 #ifdef FWD_ZONES_SUPPORT
+#define VERB_DEBUG VERB_QUERY
+
 static void handle_update_all(char *json) {
 	/* Parse the JSON string received from the script and create a list of active connections.
 	 * e.g. Ethernet with some IP address, forward zones and DNS servers, Wi-Fi connection or
 	 * corporate VPN. */
     struct nm_connection_list original =  yield_connections_from_json(json);
+	verbose(VERB_QUERY, "Query: %s", json);
+	verbose(VERB_QUERY, "running update global forwarders");
 	update_global_forwarders(&original);
+	verbose(VERB_QUERY, "running update connection zones");
 	update_connection_zones(&original);
     nm_connection_list_clear(&original);
 
@@ -829,6 +834,7 @@ static void update_global_forwarders(struct nm_connection_list *original) {
 	 * for this option is that the VPN connection should be secure, but on the other hand, we don't
 	 * want to expose our DNS traffic to our employer, for example. */
 	struct nm_connection_list defaults;
+	verbose(VERB_DEBUG, "Using VPN forwarders: %s", global_svr->cfg->use_vpn_forwarders ? "yes" : "no");
 	if (!global_svr->cfg->use_vpn_forwarders) {
 		defaults = nm_connection_list_filter(original, 1, &nm_connection_filter_default);
 	} else {
@@ -836,6 +842,8 @@ static void update_global_forwarders(struct nm_connection_list *original) {
 	}
 	/* Probe function takes a string of space separated servers :-) */
     struct string_buffer global_forward_candidates = nm_connection_list_sprint_servers(&defaults);
+	verbose(VERB_DEBUG, "Global forward candidates: %s", global_forward_candidates.string);
+	verbose(VERB_DEBUG, "Starting probe");
 	lock_acquire();
     probe_start(global_forward_candidates.string);
 	lock_release();
@@ -966,6 +974,8 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 
 	return;
 }
+
+#undef VERB_DEBUG
 
 #endif
 
