@@ -112,3 +112,4 @@ test/other-test
 test/json-test
 test/tmp
 *.tar.gz
+rpmpkg.sh
