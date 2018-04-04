@@ -895,22 +895,27 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 	struct nm_connection_list forward_zones =  hook_unbound_list_forwards(NULL);
 	FOR_EACH_STRING_IN_LIST(iter, &stored_zones.cache) {
 		if (nm_connection_list_contains_zone(connections, iter->string, iter->length)) {
+			verbose(VERB_DEBUG, "Iter over stored zones: %s is in connections", iter->string);
 			continue;
 		}
 		if (zone_in_reverse_zones(iter->string, iter->length)) {
 			if (global_svr->cfg->use_private_address_ranges) {
+				verbose(VERB_DEBUG, "Iter over stored zones: %s is in reverse zones", iter->string);
 				continue;
 			} else {
 				struct string_buffer zone = {
 					.string = iter->string,
 					.length = iter->length
 				};
+				verbose(VERB_DEBUG, "Iter over stored zones: %s add to local zones using ubhook", iter->string);
 				hook_unbound_add_local_zone(zone, static_label);
 			}
 		}
 		if (nm_connection_list_contains_zone(&forward_zones, iter->string, iter->length)) {
+			verbose(VERB_DEBUG, "Iter over stored zones: %s removing from forward zones", iter->string);
 			nm_connection_list_remove(&forward_zones, iter->string, iter->length);
 		}
+		verbose(VERB_DEBUG, "Iter over stored zones: %s removing from store", iter->string);
 		store_remove(&stored_zones, iter->string, iter->length);
 	}
 
@@ -921,6 +926,7 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 			.length = c->zones.first->length,
 		};
 		if ( (store_contains(&stored_zones, zone.string, zone.length)) || !(nm_connection_list_contains_zone(&forward_zones, zone.string, zone.length)) ) {
+			verbose(VERB_DEBUG, "Iter over connections: %s append to forward zones and add to store", zone.string);
 			nm_connection_list_copy_and_push_back(&forward_zones, iter->self);
 			store_add(&stored_zones, zone.string, zone.length);
 		}
@@ -940,6 +946,10 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 			global_forwarders = nm_connection_list_filter(connections, 1, &nm_connection_filter_default);
 		}
 
+		struct string_buffer gf_string = nm_connection_list_sprint_servers(&global_forwarders);
+		verbose(VERB_DEBUG, "Selected global forwarders: %s", gf_string.string);
+		free(gf_string.string);
+
 		for (size_t i=0; i<reverse_zones_len; ++i) {
 			const struct string_buffer *zone = &rfc1918_reverse_zones[i];
 			/*
@@ -955,17 +965,21 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 					nm_connection_init(new_zone);
 					new_zone->servers = nm_connection_list_get_servers_list(&global_forwarders);
 					new_zone->security = NM_CON_INSECURE;
+					verbose(VERB_DEBUG, "Iter over reverse zones: %s append to forward zones as insecure, add to store and remove from unbound local zones", zone->string);
 					nm_connection_list_push_back(&forward_zones, new_zone);
 					store_add(&stored_zones, zone->string, zone->length);
 					hook_unbound_remove_local_zone(*zone);
 			} else {
 				if (nm_connection_list_contains_zone(&forward_zones, zone->string, zone->length)) {
+					verbose(VERB_DEBUG, "Iter over reverse zones: %s remove from unbound local zones", zone->string);
 					hook_unbound_remove_local_zone(*zone);
 				}
 				if (store_contains(&stored_zones, zone->string, zone->length)) {
+					verbose(VERB_DEBUG, "Iter over reverse zones: %s remove from store", zone->string);
 					store_remove(&stored_zones, zone->string, zone->length);
 				}
 				hook_unbound_add_local_zone(*zone, static_label);
+				verbose(VERB_DEBUG, "Iter over reverse zones: %s add to unbound local zones", zone->string);
 			}
 		}
 	}
