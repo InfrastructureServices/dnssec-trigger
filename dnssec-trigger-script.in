@@ -747,7 +747,7 @@ class Application:
             connection = {}
 
         json_struct["connections"] = connections
-        print("Running update all with this connections:")
+        print("Running update all with these connections:")
         print(json.dumps(json_struct, sort_keys=True, indent=4, separators=(',', ': ')))
         try:
             self.dnssec_trigger_control(["update_all", json.dumps(json_struct)])
