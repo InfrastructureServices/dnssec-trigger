@@ -15,9 +15,9 @@ Source0: %{name}-%{version}_%{svn_snapshot}.tar.gz
 %else
 Source0: http://www.nlnetlabs.nl/downloads/dnssec-trigger/%{name}-%{version}.tar.gz
 %endif
-Source1: dnssec-trigger.tmpfiles.d
-Source2: dnssec-trigger-default.conf
-Source3: dnssec-trigger-workstation.conf
+# Source1: dnssec-trigger.tmpfiles.d
+# Source2: dnssec-trigger-default.conf
+# Source3: dnssec-trigger-workstation.conf
 
 # to obsolete the version in which the panel was in main package
 Obsoletes: %{name} < 0.12-22
@@ -98,8 +98,8 @@ rm -rf %{buildroot}
 %{__make} DESTDIR=%{buildroot} install
 
 install -d 0755 %{buildroot}%{_unitdir}
-install -m 0644 %{SOURCE2} %{buildroot}%{_sysconfdir}/%{name}/
-install -m 0644 %{SOURCE3} %{buildroot}%{_sysconfdir}/%{name}/
+install -m 0644 dnssec-trigger-default.conf %{buildroot}%{_sysconfdir}/%{name}/
+install -m 0644 dnssec-trigger-workstation.conf %{buildroot}%{_sysconfdir}/%{name}/
 
 mkdir -p %{buildroot}%{_libexecdir}
 
@@ -107,7 +107,7 @@ desktop-file-install --dir=%{buildroot}%{_datadir}/applications dnssec-trigger-p
 
 # install the configuration for /var/run/dnssec-trigger into tmpfiles.d dir
 mkdir -p %{buildroot}%{_tmpfilesdir}
-install -m 644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_tmpfilesdir}/%{name}.conf
+install -m 644 dnssec-trigger.tmpfiles.d ${RPM_BUILD_ROOT}%{_tmpfilesdir}/%{name}.conf
 # we must create the /var/run/dnssec-trigger directory
 mkdir -p %{buildroot}%{_localstatedir}/run
 install -d -m 0755 %{buildroot}%{_localstatedir}/run/%{name}
