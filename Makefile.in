@@ -57,12 +57,14 @@ login_location=@login_location@
 check_updates=@check_updates@
 unbound_control_path=@unbound_control_path@
 FWD_ZONES_SUPPORT=@FWD_ZONES_SUPPORT@
+NMDISPATCHERCOMMAND=@NMDISPATCHERCOMMAND@
 DATE=$(shell date +%F -r $(srcdir)/Changelog)
 
 do_subst = sed -e 's,[@]SHELL[@],$(SHELL),g' \
 	       -e 's,[@]PACKAGE[@],$(PACKAGE),g' \
 	       -e 's,[@]VERSION[@],$(VERSION),g' \
 	       -e 's,[@]PYTHON[@],$(PYTHON),g' \
+	       -e 's,[@]NMDISPATCHERCOMMAND[@],$(NMDISPATCHERCOMMAND),g' \
 	       -e 's,[@]libexecdir[@],$(libexecdir),g' \
 	       -e 's,[@]sbindir[@],$(sbindir),g' \
 	       -e 's,[@]keydir[@],$(keydir),g' \

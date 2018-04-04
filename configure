@@ -623,6 +623,7 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 DATE
+NMDISPATCHERCOMMAND
 FWD_ZONES_SUPPORT
 LDNSLIBS
 ldnsdir
@@ -7491,7 +7492,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-
+NMDISPATCHERCOMMAND="update"
 
 # Check whether --with-forward-zones-support was given.
 if test "${with_forward_zones_support+set}" = set; then :
@@ -7509,8 +7510,10 @@ if test "$USE_WINSOCK" != 1; then
 
 $as_echo "#define FWD_ZONES_SUPPORT 1" >>confdefs.h
 
+		NMDISPATCHERCOMMAND="update_all"
 	fi
 fi
+
 
 
 

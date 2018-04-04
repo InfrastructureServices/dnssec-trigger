@@ -747,14 +747,10 @@ class Application:
             connection = {}
 
         json_struct["connections"] = connections
-        #CMD = ["dnssec-trigger-control", "update_all", json.dumps(json_struct)]
-        print("Inline version:")
-        print(json.dumps(json_struct))
-        print("Pretty version:")
+        print("Running update all with this connections:")
         print(json.dumps(json_struct, sort_keys=True, indent=4, separators=(',', ': ')))
         try:
-            #subprocess.check_call(CMD)
-            print("Tož tu to zavolám, až to bude hotový...")
+            self.dnssec_trigger_control(["update_all", json.dumps(json_struct)])
         except subprocess.CalledProcessError:
             pass
 
