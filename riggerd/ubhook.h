@@ -136,6 +136,20 @@ struct string_list hook_unbound_list_local_zones(struct cfg* cfg);
 struct string_list hook_unbound_list_local_zones_inner(struct cfg* cfg, FILE *fp);
 
 /**
+ * 
+ */
+int hook_unbound_add_forward_zone_from_connection(struct nm_connection *con);
+int hook_unbound_add_forward_zone(struct string_buffer zone, struct string_buffer servers);
+int hook_unbound_add_forward_zone_inner(struct string_buffer exe, struct string_buffer zone, struct string_buffer servers);
+
+/**
+ * 
+ */
+int hook_unbound_remove_forward_zone(struct string_buffer zone);
+int hook_unbound_remove_forward_zone_inner(struct string_buffer exe, struct string_buffer zone);
+
+
+/**
  * Call unbound-control local_zone <zone> <type>
  */
 int hook_unbound_add_local_zone(struct string_buffer zone, struct string_buffer type);

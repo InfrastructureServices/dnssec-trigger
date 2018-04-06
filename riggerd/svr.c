@@ -880,20 +880,39 @@ static const size_t reverse_zones_len = 20;
 static bool zone_in_reverse_zones(char *zone, size_t len) {
 	for (size_t i = 0; i < reverse_zones_len; ++i) {
 		if (len == rfc1918_reverse_zones[i].length) {
-			return true;
+			if (strncmp(rfc1918_reverse_zones[i].string, zone, len) == 0) {
+				return true;
+			}
 		}
-		if (strncmp(rfc1918_reverse_zones[i].string, zone, len) == 0) {
-			return true;
-		}
+		
 	}
 	return false;
 }
 
 static void update_connection_zones(struct nm_connection_list *connections) {
+	/*
+	 * Inputs:
+	 * 		Stored zones = zones configured by dnssec-trigger in previous invocation of update command
+	 * 		Unbound forward zones = zones currently in use by the running Unbound instance
+	 * 		Connections = new zones taken from NetworkManager
+	 */
+	
 	struct string_buffer static_label = string_builder("static");
 	struct store stored_zones = STORE_INIT("zones");
 	struct nm_connection_list forward_zones =  hook_unbound_list_forwards(NULL);
+
+	/*
+	 * Step 1:
+	 * 		Remove zones from unbound, that were previously configured by dnssec-trigger, but are no longer
+	 * 		present in connections from NetworkManager. Preserve any zones, that were not configured by
+	 * 		dnssec-trigger, as these were probably configured by the user and it would be nice from us
+	 * 		to keep them there.
+	 */
 	FOR_EACH_STRING_IN_LIST(iter, &stored_zones.cache) {
+		struct string_buffer zone = {
+					.string = iter->string,
+					.length = iter->length
+		};
 		if (nm_connection_list_contains_zone(connections, iter->string, iter->length)) {
 			verbose(VERB_DEBUG, "Iter over stored zones: %s is in connections", iter->string);
 			continue;
@@ -902,11 +921,7 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 			if (global_svr->cfg->use_private_address_ranges) {
 				verbose(VERB_DEBUG, "Iter over stored zones: %s is in reverse zones", iter->string);
 				continue;
-			} else {
-				struct string_buffer zone = {
-					.string = iter->string,
-					.length = iter->length
-				};
+		} else {
 				verbose(VERB_DEBUG, "Iter over stored zones: %s add to local zones using ubhook", iter->string);
 				hook_unbound_add_local_zone(zone, static_label);
 			}
@@ -914,11 +929,17 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 		if (nm_connection_list_contains_zone(&forward_zones, iter->string, iter->length)) {
 			verbose(VERB_DEBUG, "Iter over stored zones: %s removing from forward zones", iter->string);
 			nm_connection_list_remove(&forward_zones, iter->string, iter->length);
+			hook_unbound_remove_forward_zone(zone);
 		}
 		verbose(VERB_DEBUG, "Iter over stored zones: %s removing from store", iter->string);
 		store_remove(&stored_zones, iter->string, iter->length);
 	}
 
+	/*
+	 * Step 2:
+	 * 		Add all zones, that are provided by connections, haven't been configured by dnssec-trigger yet are not
+	 * 		present in unbound forward zones into Unbound forward zones.
+	 */
 	for (struct nm_connection_node *iter = connections->first; NULL != iter; iter = iter->next) {
 		struct nm_connection *c = iter->self;
 		struct string_buffer zone = {
@@ -928,6 +949,7 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 		if ( (store_contains(&stored_zones, zone.string, zone.length)) || !(nm_connection_list_contains_zone(&forward_zones, zone.string, zone.length)) ) {
 			verbose(VERB_DEBUG, "Iter over connections: %s append to forward zones and add to store", zone.string);
 			nm_connection_list_copy_and_push_back(&forward_zones, iter->self);
+			hook_unbound_add_forward_zone_from_connection(iter->self);
 			store_add(&stored_zones, zone.string, zone.length);
 		}
 	}
@@ -938,6 +960,7 @@ static void update_connection_zones(struct nm_connection_list *connections) {
             # and those installed by other means than by dnssec-trigger-script.
             # RFC19118 zones will be removed if there are no global forwarders.
 	 */
+	verbose(VERB_DEBUG, "Using private address ranges: %s", global_svr->cfg->use_private_address_ranges ? "yes" : "no");
 	if (global_svr->cfg->use_private_address_ranges) {
 		struct nm_connection_list global_forwarders;
 		if (global_svr->cfg->use_vpn_forwarders) {
