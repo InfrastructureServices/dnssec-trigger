@@ -986,12 +986,15 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 			    !nm_connection_list_contains_zone(&forward_zones, zone->string, zone->length)) {
 					struct nm_connection *new_zone = (struct nm_connection *) calloc_or_die(sizeof(struct nm_connection));
 					nm_connection_init(new_zone);
+					string_list_push_back(&new_zone->zones, zone->string, zone->length);
 					new_zone->servers = nm_connection_list_get_servers_list(&global_forwarders);
 					new_zone->security = NM_CON_INSECURE;
 					verbose(VERB_DEBUG, "Iter over reverse zones: %s append to forward zones as insecure, add to store and remove from unbound local zones", zone->string);
+					hook_unbound_add_forward_zone_from_connection(new_zone);
 					nm_connection_list_push_back(&forward_zones, new_zone);
 					store_add(&stored_zones, zone->string, zone->length);
 					hook_unbound_remove_local_zone(*zone);
+					free(new_zone);
 			} else {
 				if (nm_connection_list_contains_zone(&forward_zones, zone->string, zone->length)) {
 					verbose(VERB_DEBUG, "Iter over reverse zones: %s remove from unbound local zones", zone->string);

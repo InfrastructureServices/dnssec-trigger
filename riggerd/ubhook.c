@@ -427,7 +427,7 @@ int hook_unbound_add_forward_zone(struct string_buffer zone, struct string_buffe
 }
 
 int hook_unbound_add_forward_zone_inner(struct string_buffer exe, struct string_buffer zone, struct string_buffer servers) {
-	char cmd[1000] = {'\0'};
+	char cmd[4000] = {'\0'};
 	sprintf(cmd, "%s forward_add +i %s %s", exe.string, zone.string, servers.string);
 	return run_unbound_control(cmd);
 }
@@ -438,7 +438,7 @@ int hook_unbound_remove_forward_zone(struct string_buffer zone) {
 }
 
 int hook_unbound_remove_forward_zone_inner(struct string_buffer exe, struct string_buffer zone) {
-	char cmd[1000] = {'\0'};
+	char cmd[4000] = {'\0'};
 	sprintf(cmd, "%s forward_remove %s", exe.string, zone.string);
 	return run_unbound_control(cmd);
 }

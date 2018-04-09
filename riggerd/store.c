@@ -66,7 +66,9 @@ void store_remove(struct store *self, char *string, size_t len) {
 }
 
 void store_add(struct store *self, char *string, size_t len) {
-    string_list_push_back(&self->cache, string, len);
+    if (!string_list_contains(&self->cache, string, len)) {
+        string_list_push_back(&self->cache, string, len);
+    }
 }
 
 bool store_contains(struct store *self, char *string, size_t len) {
