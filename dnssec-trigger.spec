@@ -5,7 +5,7 @@
 Summary: Tool for dynamic reconfiguration of validating resolver Unbound
 Name: dnssec-trigger
 Version: 0.15
-Release: 5%{?svn_snapshot:.%{svn_snapshot}svn}%{?dist}
+Release: 6%{?svn_snapshot:.%{svn_snapshot}svn}%{?dist}
 License: BSD
 Url: http://www.nlnetlabs.nl/downloads/dnssec-trigger/
 
@@ -178,6 +178,9 @@ fi
 
 
 %changelog
+* Mon Apr 09 2018 Martin Sehnoutka <msehnout@redhat.com> 0.15-6
+- update command reimplemented in daemon
+
 * Wed Mar 14 2018 Petr Menšík <pemensik@redhat.com> - 0.15-5
 - Accept NXDOMAIN for NSEC probe (#1555355)
 
