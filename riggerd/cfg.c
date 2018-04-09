@@ -378,12 +378,14 @@ keyword(struct cfg* cfg, char* p)
 	} else if(strncmp(p, "use_vpn_forwarders:", 19) == 0) {
 		cfg->use_vpn_forwarders = atoi(get_arg(p+19));
 		/* In case of any other value than 0 or 1, use it like 1 */
+		verbose(VERB_OPS, "Configuration - Use VPN forwarders: %d", cfg->use_vpn_forwarders);
 		if (cfg->use_vpn_forwarders != 0) {
 			cfg->use_vpn_forwarders = 1;
 		}
 	} else if(strncmp(p, "use_private_address_ranges:", 27) == 0) {
-		cfg->use_private_address_ranges = atoi(get_arg(p+19));
+		cfg->use_private_address_ranges = atoi(get_arg(p+27));
 		/* In case of any other value than 0 or 1, use it like 1 */
+		verbose(VERB_OPS, "Configuration - Use private address ranges: %d", cfg->use_private_address_ranges);
 		if (cfg->use_private_address_ranges != 0) {
 			cfg->use_private_address_ranges = 1;
 		}
