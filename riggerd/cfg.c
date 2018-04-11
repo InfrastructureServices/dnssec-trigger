@@ -375,12 +375,10 @@ keyword(struct cfg* cfg, char* p)
 			&cfg->num_http_urls, get_arg(p+4));
 	} else if(strncmp(p, "check-updates:", 14) == 0) {
 		bool_arg(&cfg->check_updates, p+14);
-	} else if(strncmp(p, "use_vpn_forwarders:", 19) == 0) {
+	} else if(strncmp(p, "use-vpn-forwarders:", 19) == 0) {
 		bool_arg(&cfg->use_vpn_forwarders, p+19);
-		verbose(VERB_OPS, "Configuration - Use VPN forwarders: %d", cfg->use_vpn_forwarders);
-	} else if(strncmp(p, "use_private_address_ranges:", 27) == 0) {
-		bool_arg(&cfg->use_private_address_ranges, p+27);
-		verbose(VERB_OPS, "Configuration - Use private address ranges: %d", cfg->use_private_address_ranges);
+	} else if(strncmp(p, "use-private-addresses:", 22) == 0) {
+		bool_arg(&cfg->use_private_address_ranges, p+22);
 	} else {
 		return 0;
 	}
