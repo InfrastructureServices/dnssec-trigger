@@ -375,20 +375,10 @@ keyword(struct cfg* cfg, char* p)
 			&cfg->num_http_urls, get_arg(p+4));
 	} else if(strncmp(p, "check-updates:", 14) == 0) {
 		bool_arg(&cfg->check_updates, p+14);
-	} else if(strncmp(p, "use_vpn_forwarders:", 19) == 0) {
-		cfg->use_vpn_forwarders = atoi(get_arg(p+19));
-		/* In case of any other value than 0 or 1, use it like 1 */
-		verbose(VERB_OPS, "Configuration - Use VPN forwarders: %d", cfg->use_vpn_forwarders);
-		if (cfg->use_vpn_forwarders != 0) {
-			cfg->use_vpn_forwarders = 1;
-		}
-	} else if(strncmp(p, "use_private_address_ranges:", 27) == 0) {
-		cfg->use_private_address_ranges = atoi(get_arg(p+27));
-		/* In case of any other value than 0 or 1, use it like 1 */
-		verbose(VERB_OPS, "Configuration - Use private address ranges: %d", cfg->use_private_address_ranges);
-		if (cfg->use_private_address_ranges != 0) {
-			cfg->use_private_address_ranges = 1;
-		}
+	} else if(strncmp(p, "use-vpn-forwarders:", 19) == 0) {
+		bool_arg(&cfg->use_vpn_forwarders, p+19);
+	} else if(strncmp(p, "use-private-addresses:", 22) == 0) {
+		bool_arg(&cfg->use_private_address_ranges, p+22);
 	} else {
 		return 0;
 	}
@@ -444,6 +434,7 @@ struct cfg* cfg_create(const char* cfgfile)
 	cfg->check_updates = (strcmp(CHECK_UPDATES, "yes")==0);
 	/* Don't use it by default */
 	cfg->use_vpn_forwarders = 0;
+	cfg->use_private_address_ranges = 1;
 
 	if(!cfg->unbound_control || !cfg->pidfile || !cfg->server_key_file ||
 		!cfg->server_cert_file || !cfg->control_key_file ||
