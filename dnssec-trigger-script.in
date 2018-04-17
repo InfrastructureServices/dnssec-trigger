@@ -212,7 +212,7 @@ class Connection:
 
         ip4_config = connection.get_ip4_config()
         if ip4_config is not None:
-            self.zones += ip4_config.get_domains()
+            self.zones += list(set(ip4_config.get_domains()+ip4_config.get_searches()))
             self.servers += ip4_config.get_nameservers()
 
         ip6_config = connection.get_ip6_config()
