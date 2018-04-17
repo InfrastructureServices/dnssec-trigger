@@ -120,6 +120,7 @@ struct cfg {
 	/** TODO: write documentation
 	 * */
 	int use_private_address_ranges;
+	int add_wifi_provided_zones;
 };
 
 /** simple list of strings */

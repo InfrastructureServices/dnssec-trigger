@@ -85,3 +85,6 @@ ssl443: 2a04:b900::10:0:0:67 7E:CF:B4:BE:B9:9A:56:0D:F7:3B:40:51:A4:78:E6:A6:FD:
 # Forward RFC 1918 private addresses to global forwarders
 # use-private-addresses: yes
 
+# Add domains provided by VPN connections into Unbound forward zones
+# add-wifi-provided-zones: no
+

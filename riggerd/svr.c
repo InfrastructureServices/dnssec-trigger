@@ -933,19 +933,39 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 	 * 		Add all zones, that are provided by connections, haven't been configured by dnssec-trigger yet are not
 	 * 		present in unbound forward zones into Unbound forward zones.
 	 */
+	verbose(VERB_DEBUG, "Use Wi-Fi provided zones: %s", global_svr->cfg->add_wifi_provided_zones ? "enabled" : "disabled");
+	nm_connection_list_dbg_eprint(&forward_zones);
 	for (struct nm_connection_node *iter = connections->first; NULL != iter; iter = iter->next) {
 		struct nm_connection *c = iter->self;
-		struct string_buffer zone = {
-			.string = c->zones.first->string,
-			.length = c->zones.first->length,
-		};
-		if ( (store_contains(&stored_zones, zone.string, zone.length)) || !(nm_connection_list_contains_zone(&forward_zones, zone.string, zone.length)) ) {
-			verbose(VERB_DEBUG, "Iter over connections: %s append to forward zones and add to store", zone.string);
-			nm_connection_list_copy_and_push_back(&forward_zones, iter->self);
-			hook_unbound_add_forward_zone_from_connection(iter->self);
-			store_add(&stored_zones, zone.string, zone.length);
+		if (!global_svr->cfg->add_wifi_provided_zones) {
+			if (c->type == NM_CON_WIFI) {
+				continue;
+			}
+		}
+		FOR_EACH_STRING_IN_LIST(string_iter, &c->zones) {
+			struct string_buffer zone = {
+				.string = string_iter->string,
+				.length = string_iter->length,
+			};
+			bool in_store = store_contains(&stored_zones, zone.string, zone.length);
+			bool in_fwd_zones = nm_connection_list_contains_zone(&forward_zones, zone.string, zone.length);
+			verbose(VERB_DEBUG, "Iter over connections: %s (%s, %s)",
+				zone.string,
+				in_store ? "in store" : "not in store",
+				in_fwd_zones ? "in fwd zones" : "not in fwd zones");
+			if ( (in_store) || !(in_fwd_zones) ) {
+				verbose(VERB_DEBUG, "Iter over connections: %s append to forward zones and add to store", zone.string);
+				struct nm_connection *new_fwd_zone = (struct nm_connection *)calloc_or_die(sizeof(struct nm_connection));
+				nm_connection_init(new_fwd_zone);
+				string_list_diplicate(&c->servers, &new_fwd_zone->servers);
+				string_list_push_back(&new_fwd_zone->zones, zone.string, zone.length);
+				nm_connection_list_push_back(&forward_zones, new_fwd_zone);
+				hook_unbound_add_forward_zone_from_connection(new_fwd_zone);
+				store_add(&stored_zones, zone.string, zone.length);
+			}
 		}
 	}
+	nm_connection_list_dbg_eprint(&forward_zones);
 
 	/*
          * Configure forward zones for reverse name resolution of private addresses.

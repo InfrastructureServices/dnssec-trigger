@@ -379,6 +379,8 @@ keyword(struct cfg* cfg, char* p)
 		bool_arg(&cfg->use_vpn_forwarders, p+19);
 	} else if(strncmp(p, "use-private-addresses:", 22) == 0) {
 		bool_arg(&cfg->use_private_address_ranges, p+22);
+	} else if(strncmp(p, "add-wifi-provided-zones:", 24) == 0) {
+		bool_arg(&cfg->add_wifi_provided_zones, p+24);
 	} else {
 		return 0;
 	}
@@ -435,6 +437,7 @@ struct cfg* cfg_create(const char* cfgfile)
 	/* Don't use it by default */
 	cfg->use_vpn_forwarders = 0;
 	cfg->use_private_address_ranges = 1;
+	cfg->add_wifi_provided_zones = 0;
 
 	if(!cfg->unbound_control || !cfg->pidfile || !cfg->server_key_file ||
 		!cfg->server_cert_file || !cfg->control_key_file ||
