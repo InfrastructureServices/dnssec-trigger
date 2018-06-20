@@ -825,6 +825,7 @@ static void update_global_forwarders(struct nm_connection_list *original) {
 	 * for this option is that the VPN connection should be secure, but on the other hand, we don't
 	 * want to expose our DNS traffic to our employer, for example. */
 	struct nm_connection_list defaults;
+	struct string_buffer global_forward_candidates;
 	verbose(VERB_DEBUG, "Using VPN forwarders: %s", global_svr->cfg->use_vpn_forwarders ? "yes" : "no");
 	if (!global_svr->cfg->use_vpn_forwarders) {
 		defaults = nm_connection_list_filter(original, 1, &nm_connection_filter_default);
@@ -832,7 +833,7 @@ static void update_global_forwarders(struct nm_connection_list *original) {
 		defaults = nm_connection_list_filter(original, 1, &nm_connection_filter_type_vpn);
 	}
 	/* Probe function takes a string of space separated servers :-) */
-	struct string_buffer global_forward_candidates = nm_connection_list_sprint_servers(&defaults);
+	global_forward_candidates = nm_connection_list_sprint_servers(&defaults);
 	verbose(VERB_DEBUG, "Global forward candidates: %s", global_forward_candidates.string);
 	verbose(VERB_DEBUG, "Starting probe");
 
@@ -870,16 +871,16 @@ static const struct string_buffer rfc1918_reverse_zones[] = {
 
 static const size_t reverse_zones_len = 20;
 
-static bool zone_in_reverse_zones(char *zone, size_t len) {
+static int zone_in_reverse_zones(char *zone, size_t len) {
 	for (size_t i = 0; i < reverse_zones_len; ++i) {
 		if (len == rfc1918_reverse_zones[i].length) {
 			if (strncmp(rfc1918_reverse_zones[i].string, zone, len) == 0) {
-				return true;
+				return 1;
 			}
 		}
 
 	}
-	return false;
+	return 0;
 }
 
 static void update_connection_zones(struct nm_connection_list *connections) {
@@ -893,8 +894,7 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 	struct string_buffer static_label = string_builder("static");
 	struct store stored_zones = STORE_INIT("zones");
 	struct nm_connection_list forward_zones =  hook_unbound_list_forwards(NULL);
-	struct string_list to_be_removed_from_store;
-	string_list_init(&to_be_removed_from_store);
+	struct string_entry* iter;
 
 	/*
 	 * Step 1:
@@ -903,27 +903,30 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 	 * 		dnssec-trigger, as these were probably configured by the user and it would be nice from us
 	 * 		to keep them there.
 	 */
-	FOR_EACH_STRING_IN_LIST(iter, &stored_zones.cache) {
+	iter = stored_zones.cache.first;
+	while(iter) {
 		struct string_buffer zone = {
 			.string = iter->string,
 			.length = iter->length
 		};
 		if (nm_connection_list_contains_zone(connections, iter->string, iter->length)) {
-			struct string_list currently_installed_servers = nm_connection_list_get_servers_list_by_name(&forward_zones, zone);
-			struct string_list advertised_servers = nm_connection_list_get_servers_list_by_name(connections, zone);
-			if (string_list_is_equal(&currently_installed_servers, &advertised_servers)) {
-				/* The same connection with the same zone and servers is already installed, skip to the next one */
-				verbose(VERB_DEBUG, "Iter over stored zones: %s is in connections", iter->string);
-				continue;
-			} else {
-				/* There is a new connection with the same zone but different name servers */
-				verbose(VERB_DEBUG, "Iter over stored zones: %s is in connections, but with different servers. Removing from store and forward zones", iter->string);
-				//store_remove(&stored_zones, iter->string, iter->length);
-				string_list_push_back(&to_be_removed_from_store, iter->string, iter->length);
-				nm_connection_list_remove(&forward_zones, iter->string, iter->length);
-				hook_unbound_remove_forward_zone(zone);
-				continue;
-			}
+            struct string_list currently_installed_servers = nm_connection_list_get_servers_list_by_name(&forward_zones, zone);
+            struct string_list advertised_servers = nm_connection_list_get_servers_list_by_name(connections, zone);
+            if (string_list_is_equal(&currently_installed_servers, &advertised_servers)) {
+                /* The same connection with the same zone and servers is already installed, skip to the next one */
+                verbose(VERB_DEBUG, "Iter over stored zones: %s is in connections", iter->string);
+                continue;
+            } else {
+                /* There is a new connection with the same zone but different name servers */
+                verbose(VERB_DEBUG, 
+                        "Iter over stored zones: %s is in connections, but with different servers. Removing from store and forward zones",
+                        iter->string);
+                nm_connection_list_remove(&forward_zones, iter->string, iter->length);
+                hook_unbound_remove_forward_zone(zone);
+                iter = iter->next;
+                store_remove(&stored_zones, zone.string, zone.length);
+                continue;
+            }
 		}
 		if (zone_in_reverse_zones(iter->string, iter->length)) {
 			if (global_svr->cfg->use_private_address_ranges) {
@@ -940,15 +943,12 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 			hook_unbound_remove_forward_zone(zone);
 		}
 		verbose(VERB_DEBUG, "Iter over stored zones: %s removing from store", iter->string);
-		//store_remove(&stored_zones, iter->string, iter->length);
-		string_list_push_back(&to_be_removed_from_store, iter->string, iter->length);
+		/* don't use FOR_EACH_STRING_IN_LIST because the stringlist
+		 * edited in the loop. pick up the next pointer, then
+		 * delete the item */
+		iter = iter->next;
+		store_remove(&stored_zones, zone.string, zone.length);
 	}
-
-	FOR_EACH_STRING_IN_LIST(iter, &to_be_removed_from_store) {
-		store_remove(&stored_zones, iter->string, iter->length);
-	}
-
-	string_list_clear(&to_be_removed_from_store);
 
 	/*
 	 * Step 2:
@@ -968,17 +968,18 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 				.string = string_iter->string,
 				.length = string_iter->length,
 			};
-			bool in_store = store_contains(&stored_zones, zone.string, zone.length);
-			bool in_fwd_zones = nm_connection_list_contains_zone(&forward_zones, zone.string, zone.length);
+			int in_store = store_contains(&stored_zones, zone.string, zone.length);
+			int in_fwd_zones = nm_connection_list_contains_zone(&forward_zones, zone.string, zone.length);
 			verbose(VERB_DEBUG, "Iter over connections: %s (%s, %s)",
 				zone.string,
 				in_store ? "in store" : "not in store",
 				in_fwd_zones ? "in fwd zones" : "not in fwd zones");
 			if ( (in_store) || !(in_fwd_zones) ) {
+				struct nm_connection* new_fwd_zone;
 				verbose(VERB_DEBUG, "Iter over connections: %s append to forward zones and add to store", zone.string);
-				struct nm_connection *new_fwd_zone = (struct nm_connection *)calloc_or_die(sizeof(struct nm_connection));
+				new_fwd_zone = (struct nm_connection *)calloc_or_die(sizeof(struct nm_connection));
 				nm_connection_init(new_fwd_zone);
-				string_list_diplicate(&c->servers, &new_fwd_zone->servers);
+				string_list_duplicate(&c->servers, &new_fwd_zone->servers);
 				string_list_push_back(&new_fwd_zone->zones, zone.string, zone.length);
 				nm_connection_list_push_back(&forward_zones, new_fwd_zone);
 				hook_unbound_add_forward_zone_from_connection(new_fwd_zone);
@@ -996,13 +997,14 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 	verbose(VERB_DEBUG, "Using private address ranges: %s", global_svr->cfg->use_private_address_ranges ? "yes" : "no");
 	if (global_svr->cfg->use_private_address_ranges) {
 		struct nm_connection_list global_forwarders;
+		struct string_buffer gf_string;
 		if (global_svr->cfg->use_vpn_forwarders) {
 			global_forwarders = nm_connection_list_filter(connections, 1, &nm_connection_filter_type_vpn);
 		} else {
 			global_forwarders = nm_connection_list_filter(connections, 1, &nm_connection_filter_default);
 		}
 
-		struct string_buffer gf_string = nm_connection_list_sprint_servers(&global_forwarders);
+		gf_string = nm_connection_list_sprint_servers(&global_forwarders);
 		verbose(VERB_DEBUG, "Selected global forwarders: %s", gf_string.string);
 		free(gf_string.string);
 

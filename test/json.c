@@ -1,3 +1,4 @@
+#include "../config.h"
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
@@ -59,12 +60,6 @@ char *json =
 
 /* A test case that does nothing and succeeds. */
 static void null_test_success(void **state) {
-    (void) state; /* unused */
-}
-
-/* A test case that does nothing and succeeds. */
-static void null_test_fail(void **state) {
-    assert_non_null(NULL);
     (void) state; /* unused */
 }
 

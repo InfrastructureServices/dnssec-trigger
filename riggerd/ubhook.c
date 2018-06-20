@@ -47,10 +47,48 @@
 #ifdef USE_WINSOCK
 #include "winrc/win_svc.h"
 #endif
+#include <ctype.h>
 
 /* the state configured for unbound */
 static int ub_has_tcp_upstream = 0;
 static int ub_has_ssl_upstream = 0;
+
+/** check if commandline argument is only a-zA-Z0-9, and ' :._-+' 
+ * also not starting with a '-' (i.e. like a commandline option) */
+static int
+allowed_arg(const char* arg)
+{
+	const char* s;
+	if(!arg) return 1;
+	/* cannot start with a '-' */
+	if(arg[0] && (arg[0]=='-' || arg[0]=='+')) {
+		log_err("command line string argument '%s' fails check on disallowed characters", arg);
+		return 0;
+	}
+	for(s = arg; *s; s++) {
+		/* definitely do not allow these characters:
+		 *  ' " & ! ; * | because it could escape the shell */
+		if( *s == '\'' || *s == '"' || *s == '&' || *s == ';' ||
+			*s == '*' || *s == '|' ) {
+			log_err("command line string argument '%s' fails check on disallowed characters", arg);
+			return 0;
+		}
+		if( (*s == ' ' || *s == '\t') && s[1] && (s[1]=='-' || s[1]=='+')) {
+			/* like " -option", disallowed */
+			log_err("command line string argument '%s' fails check on disallowed characters", arg);
+			return 0;
+		}
+		if( isalnum((unsigned char)*s) || *s == ' ' || *s == ':' ||
+			*s == '.' || *s == '_' || *s == '-' || *s == '+' ||
+			*s == '\t') {
+			continue;
+		} else 	{
+			log_err("command line string argument '%s' fails check on allowed characters", arg);
+			return 0;
+		}
+	}
+	return 1;
+}
 
 /**
  * Perform the unbound control command.
@@ -77,6 +115,7 @@ ub_ctrl(struct cfg* cfg, const char* cmd, const char* args)
 	if(cfg->unbound_control)
 		ctrl = cfg->unbound_control;
 	verbose(VERB_ALGO, "system %s %s %s", ctrl, cmd, args);
+	if(!allowed_arg(args)) return;
 	snprintf(command, sizeof(command), "%s %s %s", ctrl, cmd, args);
 #ifdef USE_WINSOCK
 	r = win_run_cmd(command);
@@ -179,6 +218,7 @@ static int hook_unbound_supports_option(struct cfg* cfg, const char* args)
 	if(cfg->unbound_control)
 		ctrl = cfg->unbound_control;
 	verbose(VERB_ALGO, "system %s %s %s", ctrl, cmd, args);
+	if(!allowed_arg(args)) return 0;
 	snprintf(command, sizeof(command), "%s %s %s", ctrl, cmd, args);
 #ifdef USE_WINSOCK
 	r = win_run_cmd(command);
@@ -298,30 +338,31 @@ void hook_unbound_ssl_upstream(struct cfg* cfg, int ssl443_ip4, int ssl443_ip6)
 
 struct nm_connection_list hook_unbound_list_forwards(struct cfg* cfg) {
 	FILE *fp;
+	struct nm_connection_list ret;
 	fp = popen("unbound-control list_forwards", "r");
-	struct nm_connection_list ret = hook_unbound_list_forwards_inner(cfg, fp);
-	fclose(fp);
+	ret = hook_unbound_list_forwards_inner(cfg, fp);
+	pclose(fp);
 	return ret;
 }
 
-struct nm_connection_list hook_unbound_list_forwards_inner(struct cfg* cfg, FILE *fp) {
+struct nm_connection_list hook_unbound_list_forwards_inner(struct cfg* ATTR_UNUSED(cfg), FILE *fp) {
 	// TODO: is there any other output??
 	// Format: <ZONE> IN forward [+i] <list of addresses>
 	
 	struct nm_connection_list ret;
-	nm_connection_list_init(&ret);
 	struct nm_connection *new;
 
 	size_t line_len = 1024;
-    ssize_t read_len = 0;
-    char *line = (char *)calloc_or_die(line_len);
-    memset(line, 0, line_len);
-    while ((read_len = getline(&line, &line_len, fp) != -1)){
+	ssize_t read_len = 0;
+	char *line = (char *)calloc_or_die(line_len);
+	nm_connection_list_init(&ret);
+	memset(line, 0, line_len);
+	while ((read_len = getline(&line, &line_len, fp) != -1)){
 		// XXX: line len is always 1??
 		size_t i = 0;
 		int parser_state = 0;
 		size_t start = 0;
-		bool run = true;
+		int run = 1;
 		new = (struct nm_connection *) calloc_or_die(sizeof(struct nm_connection));
 		nm_connection_init(new);
 		while(run) {
@@ -352,7 +393,7 @@ struct nm_connection_list hook_unbound_list_forwards_inner(struct cfg* cfg, FILE
 						while (line[i] != ' ' && line[i] != '\n') {
 							++i;
 							if (line[i] == '\n') {
-								run = false;
+								run = 0;
 								break;
 							}
 						}
@@ -371,17 +412,18 @@ struct nm_connection_list hook_unbound_list_forwards_inner(struct cfg* cfg, FILE
 
 struct string_list hook_unbound_list_local_zones(struct cfg* cfg) {
 	FILE *fp;
+	struct string_list ret;
 	fp = popen("unbound-control list_local_zones", "r");
-	struct string_list ret = hook_unbound_list_local_zones_inner(cfg, fp);
-	fclose(fp);
+	ret = hook_unbound_list_local_zones_inner(cfg, fp);
+	pclose(fp);
 	return ret;
 }
 
-struct string_list hook_unbound_list_local_zones_inner(struct cfg* cfg, FILE *fp) {
+struct string_list hook_unbound_list_local_zones_inner(struct cfg* ATTR_UNUSED(cfg), FILE *fp) {
 	struct string_list ret;
-	string_list_init(&ret);
 	char zone[1024], label[1024];
-    int r = 0;
+    	int r = 0;
+	string_list_init(&ret);
 
 	while ((r = fscanf(fp, "%s %s\n", zone, label)) > 0 ) {
         struct string_buffer label_static = string_builder("static");
@@ -403,7 +445,7 @@ static int run_unbound_control(char *cmd) {
 	if (fscanf(fp, "ok\n") != -1) {
 		ret = 0;
 	}
-	fclose(fp);
+	pclose(fp);
 	return ret;
 }
 
@@ -419,6 +461,7 @@ int hook_unbound_add_forward_zone_from_connection(struct nm_connection *con) {
 	string_list_sprint(&(con->servers), servers.string, servers.length);
 	hook_unbound_add_forward_zone(zone, servers);
 	free(servers.string);
+	return 1;
 }
 
 int hook_unbound_add_forward_zone(struct string_buffer zone, struct string_buffer servers) {
@@ -428,7 +471,9 @@ int hook_unbound_add_forward_zone(struct string_buffer zone, struct string_buffe
 
 int hook_unbound_add_forward_zone_inner(struct string_buffer exe, struct string_buffer zone, struct string_buffer servers) {
 	char cmd[4000] = {'\0'};
-	sprintf(cmd, "%s forward_add +i %s %s", exe.string, zone.string, servers.string);
+	if(!allowed_arg(zone.string)) return 0;
+	if(!allowed_arg(servers.string)) return 0;
+	snprintf(cmd, sizeof(cmd), "%s forward_add +i %s %s", exe.string, zone.string, servers.string);
 	return run_unbound_control(cmd);
 }
 
@@ -439,7 +484,8 @@ int hook_unbound_remove_forward_zone(struct string_buffer zone) {
 
 int hook_unbound_remove_forward_zone_inner(struct string_buffer exe, struct string_buffer zone) {
 	char cmd[4000] = {'\0'};
-	sprintf(cmd, "%s forward_remove %s", exe.string, zone.string);
+	if(!allowed_arg(zone.string)) return 0;
+	snprintf(cmd, sizeof(cmd), "%s forward_remove %s", exe.string, zone.string);
 	return run_unbound_control(cmd);
 }
 
@@ -450,7 +496,9 @@ int hook_unbound_add_local_zone(struct string_buffer zone, struct string_buffer 
 
 int hook_unbound_add_local_zone_inner(struct string_buffer exe, struct string_buffer zone, struct string_buffer type) {
 	char cmd[1000] = {'\0'};
-	sprintf(cmd, "%s local_zone %s %s", exe.string, zone.string, type.string);
+	if(!allowed_arg(zone.string)) return 0;
+	if(!allowed_arg(type.string)) return 0;
+	snprintf(cmd, sizeof(cmd), "%s local_zone %s %s", exe.string, zone.string, type.string);
 	return run_unbound_control(cmd);
 }
 
@@ -461,7 +509,8 @@ int hook_unbound_remove_local_zone(struct string_buffer zone) {
 
 int hook_unbound_remove_local_zone_inner(struct string_buffer exe, struct string_buffer zone) {
 	char cmd[1000] = {'\0'};
-	sprintf(cmd, "%s local_zone_remove %s", exe.string, zone.string);
+	if(!allowed_arg(zone.string)) return 0;
+	snprintf(cmd, sizeof(cmd), "%s local_zone_remove %s", exe.string, zone.string);
 	return run_unbound_control(cmd);
 }
 

@@ -2,8 +2,6 @@
  * Persistent storage in /var/run/dnssec-trigger/ directory.
  */
 
-#include "config.h"
-
 #if !defined STORE_H && defined FWD_ZONES_SUPPORT
 #define STORE_H
 
@@ -38,7 +36,7 @@ struct store store_init(const char *dir, const char *full_path, const char *full
 int store_commit(const struct store *self);
 
 /**
- * Destry cache
+ * Destroy cache
  */
 void store_destroy(struct store *self);
 
@@ -56,7 +54,7 @@ void store_add(struct store *self, char *string, size_t len);
 /*
  * Return true if the cache contains the string
  */
-bool store_contains(struct store *self, char *string, size_t len);
+int store_contains(struct store *self, char *string, size_t len);
 
 /**
  * Macro that wraps up the init function in order to reduce typing.
