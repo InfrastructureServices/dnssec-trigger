@@ -893,6 +893,8 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 	struct string_buffer static_label = string_builder("static");
 	struct store stored_zones = STORE_INIT("zones");
 	struct nm_connection_list forward_zones =  hook_unbound_list_forwards(NULL);
+	struct string_list to_be_removed_from_store;
+	string_list_init(&to_be_removed_from_store);
 
 	/*
 	 * Step 1:
@@ -907,8 +909,21 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 			.length = iter->length
 		};
 		if (nm_connection_list_contains_zone(connections, iter->string, iter->length)) {
-			verbose(VERB_DEBUG, "Iter over stored zones: %s is in connections", iter->string);
-			continue;
+			struct string_list currently_installed_servers = nm_connection_list_get_servers_list_by_name(&forward_zones, zone);
+			struct string_list advertised_servers = nm_connection_list_get_servers_list_by_name(connections, zone);
+			if (string_list_is_equal(&currently_installed_servers, &advertised_servers)) {
+				/* The same connection with the same zone and servers is already installed, skip to the next one */
+				verbose(VERB_DEBUG, "Iter over stored zones: %s is in connections", iter->string);
+				continue;
+			} else {
+				/* There is a new connection with the same zone but different name servers */
+				verbose(VERB_DEBUG, "Iter over stored zones: %s is in connections, but with different servers. Removing from store and forward zones", iter->string);
+				//store_remove(&stored_zones, iter->string, iter->length);
+				string_list_push_back(&to_be_removed_from_store, iter->string, iter->length);
+				nm_connection_list_remove(&forward_zones, iter->string, iter->length);
+				hook_unbound_remove_forward_zone(zone);
+				continue;
+			}
 		}
 		if (zone_in_reverse_zones(iter->string, iter->length)) {
 			if (global_svr->cfg->use_private_address_ranges) {
@@ -925,8 +940,15 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 			hook_unbound_remove_forward_zone(zone);
 		}
 		verbose(VERB_DEBUG, "Iter over stored zones: %s removing from store", iter->string);
+		//store_remove(&stored_zones, iter->string, iter->length);
+		string_list_push_back(&to_be_removed_from_store, iter->string, iter->length);
+	}
+
+	FOR_EACH_STRING_IN_LIST(iter, &to_be_removed_from_store) {
 		store_remove(&stored_zones, iter->string, iter->length);
 	}
+
+	string_list_clear(&to_be_removed_from_store);
 
 	/*
 	 * Step 2:
@@ -934,7 +956,6 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 	 * 		present in unbound forward zones into Unbound forward zones.
 	 */
 	verbose(VERB_DEBUG, "Use Wi-Fi provided zones: %s", global_svr->cfg->add_wifi_provided_zones ? "enabled" : "disabled");
-	nm_connection_list_dbg_eprint(&forward_zones);
 	for (struct nm_connection_node *iter = connections->first; NULL != iter; iter = iter->next) {
 		struct nm_connection *c = iter->self;
 		if (!global_svr->cfg->add_wifi_provided_zones) {
@@ -965,7 +986,6 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 			}
 		}
 	}
-	nm_connection_list_dbg_eprint(&forward_zones);
 
 	/*
          * Configure forward zones for reverse name resolution of private addresses.

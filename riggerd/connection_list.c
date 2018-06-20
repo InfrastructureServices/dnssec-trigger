@@ -122,6 +122,19 @@ struct string_list nm_connection_list_get_servers_list(struct nm_connection_list
     return ret;
 }
 
+struct string_list nm_connection_list_get_servers_list_by_name(struct nm_connection_list *list, struct string_buffer zone) {
+    struct string_list ret;
+    string_list_init(&ret);
+
+    for (struct nm_connection_node *iter = list->first; NULL != iter; iter = iter->next) {
+        if (string_list_contains(&(iter->self->zones), zone.string, zone.length)) {
+            string_list_copy_and_append(&ret, &iter->self->servers);
+        }
+    }
+
+    return ret;    
+}
+
 struct nm_connection_list nm_connection_list_filter(struct nm_connection_list *list,
         unsigned int count, ...)
 {

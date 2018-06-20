@@ -151,6 +151,13 @@ int nm_connection_list_remove(struct nm_connection_list *list, char *zone, size_
 struct string_list nm_connection_list_get_servers_list(struct nm_connection_list *list);
 
 /**
+ * Get a list of servers tight to the zone name
+ * @param list: List to search through
+ * @param zone: Name of the desired zone
+ */
+struct string_list nm_connection_list_get_servers_list_by_name(struct nm_connection_list *list, struct string_buffer zone);
+
+/**
  * Filter connections list and return a new non-owning one, which contains only those connections
  * that satisfy **all** filters.
  * @param list: Original list (will be a superset to the new one)
