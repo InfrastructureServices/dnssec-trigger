@@ -909,44 +909,44 @@ static void update_connection_zones(struct nm_connection_list *connections) {
 			.string = iter->string,
 			.length = iter->length
 		};
-		if (nm_connection_list_contains_zone(connections, iter->string, iter->length)) {
-            struct string_list currently_installed_servers = nm_connection_list_get_servers_list_by_name(&forward_zones, zone);
-            struct string_list advertised_servers = nm_connection_list_get_servers_list_by_name(connections, zone);
-            if (string_list_is_equal(&currently_installed_servers, &advertised_servers)) {
-                /* The same connection with the same zone and servers is already installed, skip to the next one */
-                verbose(VERB_DEBUG, "Iter over stored zones: %s is in connections", iter->string);
-                continue;
-            } else {
-                /* There is a new connection with the same zone but different name servers */
-                verbose(VERB_DEBUG, 
-                        "Iter over stored zones: %s is in connections, but with different servers. Removing from store and forward zones",
-                        iter->string);
-                nm_connection_list_remove(&forward_zones, iter->string, iter->length);
-                hook_unbound_remove_forward_zone(zone);
-                iter = iter->next;
-                store_remove(&stored_zones, zone.string, zone.length);
-                continue;
-            }
-		}
-		if (zone_in_reverse_zones(iter->string, iter->length)) {
-			if (global_svr->cfg->use_private_address_ranges) {
-				verbose(VERB_DEBUG, "Iter over stored zones: %s is in reverse zones", iter->string);
-				continue;
-			} else {
-				verbose(VERB_DEBUG, "Iter over stored zones: %s add to local zones using ubhook", iter->string);
-				hook_unbound_add_local_zone(zone, static_label);
-			}
-		}
-		if (nm_connection_list_contains_zone(&forward_zones, iter->string, iter->length)) {
-			verbose(VERB_DEBUG, "Iter over stored zones: %s removing from forward zones", iter->string);
-			nm_connection_list_remove(&forward_zones, iter->string, iter->length);
-			hook_unbound_remove_forward_zone(zone);
-		}
-		verbose(VERB_DEBUG, "Iter over stored zones: %s removing from store", iter->string);
 		/* don't use FOR_EACH_STRING_IN_LIST because the stringlist
 		 * edited in the loop. pick up the next pointer, then
 		 * delete the item */
 		iter = iter->next;
+		if (nm_connection_list_contains_zone(connections, zone.string, zone.length)) {
+            struct string_list currently_installed_servers = nm_connection_list_get_servers_list_by_name(&forward_zones, zone);
+            struct string_list advertised_servers = nm_connection_list_get_servers_list_by_name(connections, zone);
+            if (string_list_is_equal(&currently_installed_servers, &advertised_servers)) {
+                /* The same connection with the same zone and servers is already installed, skip to the next one */
+                verbose(VERB_DEBUG, "Iter over stored zones: %s is in connections", zone.string);
+            } else {
+                /* There is a new connection with the same zone but different name servers */
+                verbose(VERB_DEBUG, 
+                        "Iter over stored zones: %s is in connections, but with different servers. Removing from store and forward zones",
+                        zone.string);
+                nm_connection_list_remove(&forward_zones, zone.string, zone.length);
+                hook_unbound_remove_forward_zone(zone);
+                store_remove(&stored_zones, zone.string, zone.length);
+            }
+			string_list_clear(&currently_installed_servers);
+			string_list_clear(&advertised_servers);
+			continue;
+		}
+		if (zone_in_reverse_zones(zone.string, zone.length)) {
+			if (global_svr->cfg->use_private_address_ranges) {
+				verbose(VERB_DEBUG, "Iter over stored zones: %s is in reverse zones", zone.string);
+				continue;
+			} else {
+				verbose(VERB_DEBUG, "Iter over stored zones: %s add to local zones using ubhook", zone.string);
+				hook_unbound_add_local_zone(zone, static_label);
+			}
+		}
+		if (nm_connection_list_contains_zone(&forward_zones, zone.string, zone.length)) {
+			verbose(VERB_DEBUG, "Iter over stored zones: %s removing from forward zones", zone.string);
+			nm_connection_list_remove(&forward_zones, zone.string, zone.length);
+			hook_unbound_remove_forward_zone(zone);
+		}
+		verbose(VERB_DEBUG, "Iter over stored zones: %s removing from store", zone.string);
 		store_remove(&stored_zones, zone.string, zone.length);
 	}
 
