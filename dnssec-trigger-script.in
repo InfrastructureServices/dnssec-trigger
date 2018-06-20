@@ -1,4 +1,4 @@
-#!/usr/bin/python -sE
+#!@PYTHON@ -sE
 # -*- coding: utf-8 -*-
 """
 @author: Tomas Hozza <thozza@redhat.com>
