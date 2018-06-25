@@ -137,7 +137,7 @@ static void store_commit_cache(void **state) {
 static void ubhook_list_forwards_test(void **state) {
     FILE *fp;
     struct nm_connection_list ret;
-    struct string_buffer zone = string_builder("ny.mylovelycorporate.io.");
+    struct string_buffer zone = string_builder("ny.mylovelycorporate.io");
     struct string_buffer zone2 = string_builder(".");
 
 	fp = fopen("test/list_forwards_example", "r");
@@ -190,7 +190,7 @@ static void ubhook_remove_local_zone(void **state) {
 static void nm_list_remove(void **state) {
     FILE *fp;
     struct nm_connection_list ret;
-    struct string_buffer zone = string_builder("ny.mylovelycorporate.io.");
+    struct string_buffer zone = string_builder("ny.mylovelycorporate.io");
     struct string_buffer zone2 = string_builder(".");
 
 	fp = fopen("test/list_forwards_example", "r");

@@ -371,7 +371,15 @@ struct nm_connection_list hook_unbound_list_forwards_inner(struct cfg* ATTR_UNUS
 					while (line[i] != ' ') {
 						++i;
 					}
-					string_list_push_back(&new->zones, &line[start], i-start);
+					/*
+					The search domains provided by NetworkManager are without the trailing
+					dot, therefor I skip it here as well, except for root zone of course.
+					*/
+					if (i-start == 1) {
+						string_list_push_back(&new->zones, &line[start], i-start);
+					} else {
+						string_list_push_back(&new->zones, &line[start], i-start-1);
+					}
 					++i;
 					parser_state = 1;
 					break;
